@@ -71,7 +71,7 @@ export async function POST(req: Request) {
 
     // 5. Envoi via Resend avec gestion d'erreur spécifique
     const { data, error } = await resend.emails.send({
-      from: 'Alluvi Health-Care <contact@support.alluvihealth.store>',
+      from: 'Alluvi Health-Care <support@alluvihealthcareuk.store>',
       to: [order.email_address],
       subject: subject,
       html: emailContent,
