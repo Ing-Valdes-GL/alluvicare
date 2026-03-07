@@ -198,7 +198,7 @@ function ChatInterface() {
                 >
                   <div className="relative w-12 h-12 rounded-full bg-brand-primary/20 flex items-center justify-center font-bold text-brand-primary">
                     {conv.profiles?.full_name[0]}
-                    {conv.unread_count > 0 && (
+                    {(conv.unread_count ?? 0)> 0 && (
                       <span className="absolute -top-1 -right-1 bg-brand-primary text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center ring-2 ring-white">
                         {conv.unread_count}
                       </span>
@@ -229,8 +229,8 @@ function ChatInterface() {
                       <div key={msg.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
                         <div className={`max-w-[70%] ${isOwn ? 'items-end' : 'items-start'} flex flex-col`}>
                           <div className={`px-4 py-2 rounded-2xl text-sm ${isOwn ? 'bg-brand-primary text-white rounded-tr-none' : 'bg-white border border-gray-100 rounded-tl-none'}`}>
-                            {msg.message_type === 'image' ? (
-                                <img src={msg.file_url} className="rounded-lg max-w-full cursor-pointer" onClick={() => window.open(msg.file_url, '_blank')} />
+                            {msg.message_type === 'image' && msg.file_url ? (
+                                <img src={msg.file_url} className="rounded-lg max-w-full cursor-pointer" onClick={() => msg.file_url && window.open(msg.file_url, '_blank')} />
                             ) : msg.content}
                           </div>
                           <div className="flex items-center gap-1 mt-1 px-1">
