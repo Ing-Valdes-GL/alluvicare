@@ -37,9 +37,10 @@ export default function HomePage() {
   }
 
   return (
+    
     <div className="min-h-screen bg-white text-[#0A0A0B]">
       <Header />
-
+<meta name="google-site-verification" content="ZXYDUNLP1M2OtoFdtv7y4Fcw0TtJ3wnK7IqSv283wpk" />
 {/* --- HERO SECTION : REPRODUCTION EXACTE MAQUETTE --- */}
 <section className="relative bg-[#050505] min-h-[85vh] flex items-center justify-center overflow-hidden">
   
