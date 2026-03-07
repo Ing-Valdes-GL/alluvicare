@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   
 
   verification: {
-    google: 'google-site-verification: google13fea30b520f7ba8.html', // Plus besoin du fichier .html dans /public !
+    google: 'ZXYDUNLP1M2OtoFdtv7y4Fcw0TtJ3wnK7IqSv283wpk', // Plus besoin du fichier .html dans /public !
   },
 
   keywords: ["pharmaceutical logistics UK", "secure medical delivery", "healthcare distribution", "discreet pharmacy shipping", "BPC-157 UK", "Lab tested research"],
