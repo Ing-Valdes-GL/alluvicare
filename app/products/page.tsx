@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo, Suspense } from 'react' // Suspense ajouté
+import { useState, useEffect, useMemo, Suspense } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ShoppingCart, Search, CheckCircle2, Percent, Mail, Loader2 } from 'lucide-react'
 import Link from 'next/link'
@@ -8,7 +8,8 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Footer from '@/components/Footer'
 
-// Composant interne pour gérer la logique des produits
+// --- LA MÉTHODE METADATA A ÉTÉ SUPPRIMÉE D'ICI POUR ÉVITER L'ERREUR DE BUILD ---
+
 function ProductListContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -23,10 +24,18 @@ function ProductListContent() {
   const [addedItemName, setAddedItemName] = useState('')
   const [filterPromo, setFilterPromo] = useState(false)
 
+  // GESTION DYNAMIQUE DU SEO (Remplace l'export metadata)
   useEffect(() => {
+    // Mise à jour du Titre
     document.title = filterPromo 
       ? "Exclusive Research Deals | Alluvi Health Care" 
-      : "High-Purity Research Compounds | Alluvi Health Care";
+      : "Retatrutite Products & Research Compounds | Alluvi Health Care";
+    
+    // Mise à jour de la Description
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) {
+      metaDesc.setAttribute("content", "Browse our catalog of licensed medical and pharmaceutical products including Retatrutite. Fast and secure delivery across the United Kingdom.");
+    }
   }, [filterPromo])
 
   useEffect(() => {
@@ -85,7 +94,7 @@ function ProductListContent() {
   }
 
   return (
-    <div className="bg-white min-h-screen flex flex-col font-sans">
+    <div className="bg-white min-h-screen flex flex-col font-sans text-black">
       <AnimatePresence>
         {showPopup && (
           <motion.div 
@@ -104,6 +113,7 @@ function ProductListContent() {
         )}
       </AnimatePresence>
 
+      {/* Top Bar Marquee */}
       <div className="bg-[#0A0A0A] text-white py-2.5 overflow-hidden border-b border-white/10 relative z-[100]">
         <div className="flex whitespace-nowrap animate-marquee">
           {[1, 2, 3].map((i) => (
@@ -127,7 +137,7 @@ function ProductListContent() {
                 value={searchValue} 
                 onChange={(e) => setSearchValue(e.target.value)} 
                 placeholder="Search research products..." 
-                className="flex-grow px-6 py-2.5 text-sm outline-none text-black" // Correction : text-black ajouté ici
+                className="flex-grow px-6 py-2.5 text-sm outline-none text-black" 
               />
               <div className="bg-white px-4 flex items-center text-gray-400"><Search size={18} /></div>
             </div>
@@ -154,14 +164,10 @@ function ProductListContent() {
         <nav className="bg-[#EF6C00]">
           <div className="container mx-auto px-4 flex items-center justify-between h-12">
             <div className="flex items-center h-full gap-8 text-white text-[10px] font-black uppercase tracking-widest overflow-x-auto no-scrollbar">
-              <Link href="/" className="hover:opacity-70">HOME</Link>
+              <Link href="/">HOME</Link>
               <Link href="/products" className="border-b-2 border-white pb-1">SHOP</Link>
-              <Link href="/orders" className="hover:opacity-70">MY ORDERS</Link>
-              <Link href="/chat" className="hover:opacity-70">SUPPORT</Link>
-              <Link href="/admin" className="bg-black/20 px-3 py-1 rounded hover:bg-black/40 transition-colors">ADMIN</Link>
-            </div>
-            <div className="hidden sm:flex items-center gap-3 text-white">
-              <a href="mailto:support@alluvi.com" className="bg-[#BF5600] p-1.5 rounded-full hover:bg-black transition-all" title="Contact Support"><Mail size={14} /></a>
+              <Link href="/orders">MY ORDERS</Link>
+              <Link href="/chat">SUPPORT</Link>
             </div>
           </div>
         </nav>
@@ -169,11 +175,12 @@ function ProductListContent() {
 
       <main className="container mx-auto px-4 py-12 flex-grow">
         <div className="flex flex-col items-center mb-16">
-            <span className="bg-[#0A0A0A] text-white px-5 py-1.5 text-[9px] font-black uppercase tracking-[0.4em] mb-4 rounded-full">
-              Premium Lab Supply
+            <span className="bg-[#22C55E] text-white px-5 py-1.5 text-[9px] font-black uppercase tracking-[0.4em] mb-4 rounded-full shadow-sm">
+              Lab Tested Prducts
             </span>
             <h1 className="text-3xl md:text-5xl font-black text-center uppercase text-gray-900 tracking-tighter">
               {filterPromo ? 'Exclusive Research Deals' : 'Alluvi Compound Collection'}
+              <span className="sr-only"> - Retatrutite products and specialized research compounds UK</span>
             </h1>
             <p className="text-gray-500 mt-4 text-center max-w-xl text-sm md:text-base italic">
               Supplying the UK with pharmaceutical-grade research chemicals and precision delivery systems.
@@ -205,7 +212,7 @@ function ProductListContent() {
                   <img 
                     src={product.main_image_url || "/placeholder.png"} 
                     className="max-h-full w-auto object-contain transition-transform duration-700 group-hover:scale-110" 
-                    alt={`${product.name} - Research Compound`}
+                    alt={`${product.name} - Retatrutite products UK research`}
                     loading="lazy"
                   />
                 </Link>
@@ -250,12 +257,12 @@ function ProductListContent() {
       <style jsx global>{`
         @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
         .animate-marquee { animation: marquee 25s linear infinite; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
       `}</style>
     </div>
   )
 }
 
-// COMPOSANT PAR DÉFAUT (Celui qui corrige l'erreur de build)
 export default function ProductsPage() {
   return (
     <Suspense fallback={
