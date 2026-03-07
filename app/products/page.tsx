@@ -1,19 +1,15 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, Suspense } from 'react' // Suspense ajouté
 import { motion, AnimatePresence } from 'framer-motion'
-import { ShoppingCart, Search, CheckCircle2, Percent, Mail, ArrowRight, Loader2 } from 'lucide-react'
+import { ShoppingCart, Search, CheckCircle2, Percent, Mail, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Footer from '@/components/Footer'
 
-// Composant de Skeleton pour le chargement (meilleur LCP)
-const ProductSkeleton = () => (
-  <div className="animate-pulse bg-gray-50 rounded-2xl border border-gray-100 h-[450px]" />
-)
-
-export default function Header() {
+// Composant interne pour gérer la logique des produits
+function ProductListContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   
@@ -27,14 +23,12 @@ export default function Header() {
   const [addedItemName, setAddedItemName] = useState('')
   const [filterPromo, setFilterPromo] = useState(false)
 
-  // --- 1. SEO & TITRE DYNAMIQUE ---
   useEffect(() => {
     document.title = filterPromo 
       ? "Exclusive Research Deals | Alluvi Health Care" 
       : "High-Purity Research Compounds | Alluvi Health Care";
   }, [filterPromo])
 
-  // --- 2. CHARGEMENT DES DONNÉES ---
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -54,7 +48,6 @@ export default function Header() {
     fetchData()
   }, [])
 
-  // --- 3. FILTRAGE OPTIMISÉ (Memoized pour la perf) ---
   const filteredProducts = useMemo(() => {
     return products.filter((p: any) => {
       const matchesSearch = p.name.toLowerCase().includes(searchValue.toLowerCase())
@@ -63,7 +56,6 @@ export default function Header() {
     })
   }, [products, searchValue, filterPromo])
 
-  // --- 4. GESTION DU PANIER ---
   useEffect(() => {
     const updateCartCount = () => {
       const cart = JSON.parse(localStorage.getItem('cart') || '[]')
@@ -94,8 +86,6 @@ export default function Header() {
 
   return (
     <div className="bg-white min-h-screen flex flex-col font-sans">
-      
-      {/* POPUP SUCCÈS */}
       <AnimatePresence>
         {showPopup && (
           <motion.div 
@@ -114,7 +104,6 @@ export default function Header() {
         )}
       </AnimatePresence>
 
-      {/* BANDE DÉFILANTE */}
       <div className="bg-[#0A0A0A] text-white py-2.5 overflow-hidden border-b border-white/10 relative z-[100]">
         <div className="flex whitespace-nowrap animate-marquee">
           {[1, 2, 3].map((i) => (
@@ -138,7 +127,7 @@ export default function Header() {
                 value={searchValue} 
                 onChange={(e) => setSearchValue(e.target.value)} 
                 placeholder="Search research products..." 
-                className="flex-grow px-6 py-2.5 text-sm outline-none" 
+                className="flex-grow px-6 py-2.5 text-sm outline-none text-black" // Correction : text-black ajouté ici
               />
               <div className="bg-white px-4 flex items-center text-gray-400"><Search size={18} /></div>
             </div>
@@ -179,7 +168,6 @@ export default function Header() {
       </header>
 
       <main className="container mx-auto px-4 py-12 flex-grow">
-        {/* Titre SEO-Friendly */}
         <div className="flex flex-col items-center mb-16">
             <span className="bg-[#0A0A0A] text-white px-5 py-1.5 text-[9px] font-black uppercase tracking-[0.4em] mb-4 rounded-full">
               Premium Lab Supply
@@ -194,7 +182,9 @@ export default function Header() {
 
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {[1,2,3,4,5,6,7,8].map(i => <ProductSkeleton key={i} />)}
+            {[1,2,3,4,5,6,7,8].map(i => (
+               <div key={i} className="animate-pulse bg-gray-50 rounded-2xl border border-gray-100 h-[450px]" />
+            ))}
           </div>
         ) : filteredProducts.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-10">
@@ -206,7 +196,6 @@ export default function Header() {
                 animate={{ opacity: 1, y: 0 }} 
                 className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group flex flex-col overflow-hidden"
               >
-                {/* IMAGE */}
                 <Link href={`/products/${product.id}`} className="relative aspect-square overflow-hidden bg-[#FBFBFB] flex items-center justify-center p-8">
                   {product.on_sale && (
                     <div className="absolute top-4 left-4 bg-red-600 text-white text-[9px] font-black px-3 py-1.5 rounded-lg shadow-lg z-10 animate-pulse">
@@ -219,36 +208,24 @@ export default function Header() {
                     alt={`${product.name} - Research Compound`}
                     loading="lazy"
                   />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
-                    <span className="bg-white text-black text-[10px] font-black uppercase px-6 py-2.5 rounded-full shadow-xl transform translate-y-4 group-hover:translate-y-0 transition-transform">
-                      View Analysis
-                    </span>
-                  </div>
                 </Link>
 
                 <div className="p-6 flex flex-col flex-grow">
                   <span className="text-[#EF6C00] text-[9px] font-black uppercase tracking-[0.2em] mb-2 block opacity-80">
                     {product.category_name || 'Laboratory'}
                   </span>
-
                   <Link href={`/products/${product.id}`}>
                     <h2 className="font-black text-gray-900 uppercase text-lg mb-3 leading-tight group-hover:text-[#EF6C00] transition-colors">
                       {product.name}
                     </h2>
                   </Link>
-
                   <p className="text-gray-500 text-xs mb-6 line-clamp-2 h-8 leading-relaxed">
-                    {product.description || "High-purity laboratory research compound. Verified by independent 3rd party analysis."}
+                    {product.description || "High-purity laboratory research compound."}
                   </p>
-                  
                   <div className="mt-auto">
                     <div className="flex items-center gap-3 mb-5">
                       <p className="text-[#EF6C00] font-black text-2xl">£{product.price}</p>
-                      {product.on_sale && product.sale_price && (
-                        <p className="text-gray-300 line-through text-sm font-bold">£{product.sale_price}</p>
-                      )}
                     </div>
-                    
                     <button 
                       onClick={(e) => addToCart(e, product)} 
                       className="w-full bg-[#0A0A0A] text-white py-4 rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-[#EF6C00] active:scale-95 transition-all flex items-center justify-center gap-3"
@@ -264,7 +241,6 @@ export default function Header() {
           <div className="py-20 text-center">
             <Search size={48} className="mx-auto text-gray-200 mb-4" />
             <h3 className="text-xl font-bold text-gray-400 uppercase">No products found</h3>
-            <button onClick={() => {setSearchValue(''); setFilterPromo(false)}} className="mt-4 text-[#EF6C00] font-black uppercase text-xs underline">Clear filters</button>
           </div>
         )}
       </main>
@@ -274,9 +250,20 @@ export default function Header() {
       <style jsx global>{`
         @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
         .animate-marquee { animation: marquee 25s linear infinite; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
     </div>
+  )
+}
+
+// COMPOSANT PAR DÉFAUT (Celui qui corrige l'erreur de build)
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <Loader2 className="animate-spin text-[#EF6C00]" size={48} />
+      </div>
+    }>
+      <ProductListContent />
+    </Suspense>
   )
 }
