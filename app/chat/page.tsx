@@ -3,6 +3,11 @@
 import { useEffect } from 'react'
 import { Loader2 } from 'lucide-react'
 
+export const metadata = {
+  title: "Contact Us | Alluvi Health-Care Support",
+  description: "Have questions? Contact our team for inquiries about pharmaceutical logistics, orders, or partnerships. We are here to help.",
+}
+
 export default function ChatRedirectPage() {
   const whatsappNumber = "+447818576208"
   const message = "Hello! I have a question about Alluvi products."

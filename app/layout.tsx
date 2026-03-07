@@ -84,7 +84,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     "@type": "MedicalOrganization",
     "name": "Alluvi Health-Care",
     "url": "https://alluvihealthcareuk.store",
-    "logo": "https://alluvihealthcareuk.store/logo.png",
+    "logo": "https://alluvihealthcareuk.store/favicon.ico",
     "contactPoint": {
       "@type": "ContactPoint",
       "telephone": "+237-692-118-391",

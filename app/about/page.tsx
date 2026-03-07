@@ -7,6 +7,11 @@ import { ArrowRight, ShoppingBag, Percent, Truck } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect } from 'react'
 
+export const metadata = {
+  title: "About Us | Alluvi Health-Care Logistics Specialist",
+  description: "Learn more about Alluvi Health-Care's mission, our commitment to safety, and our expertise in pharmaceutical supply chains.",
+}
+
 export default function AboutPage() {
   
   // SEO : Titre de l'onglet dynamique (optionnel mais recommandé)
