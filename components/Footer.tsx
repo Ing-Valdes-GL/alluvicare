@@ -106,7 +106,7 @@ export default function Footer() {
               </li>
 
               <li className="flex items-center gap-5 group">
-                <a href="https://wa.me/+447818576208" target="_blank" rel="noopener noreferrer" className="flex items-center gap-5">
+                <a href="https://wa.me/+237692118391" target="_blank" rel="noopener noreferrer" className="flex items-center gap-5">
                   <div className={`p-4 rounded-2xl transition-all ${theme === 'dark' ? 'bg-gray-900 group-hover:bg-green-500' : 'bg-gray-100 group-hover:bg-green-500'} group-hover:text-white`}>
                     <Phone size={20} />
                   </div>
@@ -118,7 +118,7 @@ export default function Footer() {
               </li>
 
               <li className="flex items-center gap-5 group">
-                <a href="https://t.me/+447818576208" target="_blank" rel="noopener noreferrer" className="flex items-center gap-5">
+                <a href="https://t.me/+237692118391" target="_blank" rel="noopener noreferrer" className="flex items-center gap-5">
                   <div className={`p-4 rounded-2xl transition-all ${theme === 'dark' ? 'bg-gray-900 group-hover:bg-blue-500' : 'bg-gray-100 group-hover:bg-blue-500'} group-hover:text-white`}>
                     <MessageCircle size={20} />
                   </div>
@@ -142,8 +142,24 @@ export default function Footer() {
           </div>
         </div>
 
+        {/* --- SECTION DES LOGOS DE PAIEMENT EN COULEUR --- */}
+        <div className="mt-20 flex flex-col items-center gap-6">
+           <div className="flex flex-wrap justify-center items-center gap-6">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard" className="h-6 w-auto" />
+              <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="PayPal" className="h-6 w-auto" />
+              <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo_2014.svg" alt="Visa" className="h-4 w-auto" />
+              <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/American_Express_logo_%282018%29.svg" alt="Amex" className="h-6 w-auto" />
+              <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/Maestro_logo.svg" alt="Maestro" className="h-6 w-auto" />
+              <img src="https://upload.wikimedia.org/wikipedia/commons/a/a6/Diners_Club_Logo3.svg" alt="Diners Club" className="h-6 w-auto" />
+              <img src="https://upload.wikimedia.org/wikipedia/commons/4/40/JCB_logo.svg" alt="JCB" className="h-6 w-auto" />
+           </div>
+           <p className={`text-[11px] font-bold uppercase tracking-[0.2em] opacity-50 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+              Advancing discovery through Alluvi research
+           </p>
+        </div>
+
         {/* Bottom Bar */}
-        <div className={`mt-20 pt-10 border-t ${theme === 'dark' ? 'border-white/5' : 'border-gray-100'} flex flex-col md:flex-row justify-between items-center gap-8`}>
+        <div className={`mt-10 pt-10 border-t ${theme === 'dark' ? 'border-white/5' : 'border-gray-100'} flex flex-col md:flex-row justify-between items-center gap-8`}>
           <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40">
             © {new Date().getFullYear()} Alluvi Health-Care. All rights reserved.
           </p>
