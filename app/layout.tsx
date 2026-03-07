@@ -1,37 +1,52 @@
 import './globals.css'
 import { Inter } from 'next/font/google'
-import { Metadata } from 'next'
+import { Metadata, Viewport } from 'next'
 import { ThemeProvider } from '../components/ThemeProvider'
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ['latin'], display: 'swap' })
+
+// Configuration du Viewport pour une fluidité mobile parfaite
+export const viewport: Viewport = {
+  themeColor: '#f97316', // Orange-500 Alluvi
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+}
 
 export const metadata: Metadata = {
-  // 1. Optimisation du titre pour Google (Max 60 caractères)
+  // 1. Titre & Description (SEO On-Page)
   title: {
     default: "Alluvi Health-Care | Secured Pharmaceutical Logistics UK",
     template: "%s | Alluvi Health-Care"
   },
+  description: "Alluvi Health-Care provides licensed, temperature-controlled, and discreet pharmaceutical logistics across the UK. Secure healthcare distribution with blockchain-grade tracking.",
   
-  // 2. Description enrichie avec mots-clés (Max 155 caractères)
-  description: "Alluvi Health-Care: Licensed pharmaceutical logistics in the UK. We provide secure, temperature-controlled, and discreet delivery for sensitive healthcare products.",
+  metadataBase: new URL('https://alluvihealthcareuk.store'), 
   
-  // IMPORTANT: Remplace par ton domaine exact acheté chez Namecheap
-  metadataBase: new URL('https://alluvihealth.store'), 
-  
-  // 3. Mots-clés (Bien que moins utilisés par Google, utile pour d'autres moteurs)
-  keywords: ["pharmaceutical logistics UK", "secure medical delivery", "healthcare distribution", "discreet pharmacy shipping"],
 
+  verification: {
+    google: 'google-site-verification: google13fea30b520f7ba8.html', // Plus besoin du fichier .html dans /public !
+  },
+
+  keywords: ["pharmaceutical logistics UK", "secure medical delivery", "healthcare distribution", "discreet pharmacy shipping", "BPC-157 UK", "Lab tested research"],
   authors: [{ name: "Alluvi Health-Care Team" }],
 
-  // 4. Configuration Open Graph (WhatsApp, FB, LinkedIn)
+  // 3. Icons (Indispensable pour le look pro dans Google)
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon-32x32.png',
+    apple: '/apple-touch-icon.png',
+  },
+
+  // 4. Open Graph (Partage réseaux sociaux)
   openGraph: {
     title: "Alluvi Health-Care | Professional Medical Logistics",
     description: "Secure & Discreet Pharmaceutical Delivery Services across the UK. Professionalism at every step.",
-    url: 'https://alluvihealth.store',
+    url: 'https://alluvihealthcareuk.store',
     siteName: 'Alluvi Health-Care',
     images: [
       {
-        url: '/og-image.jpg', // Utilise un .jpg de haute qualité (1200x630)
+        url: '/og-image.jpg',
         width: 1200,
         height: 630,
         alt: 'Alluvi Health-Care - Secured Medical Logistics',
@@ -41,23 +56,21 @@ export const metadata: Metadata = {
     type: 'website',
   },
 
-  // 5. Twitter Card (Optimisé pour X)
+  // 5. Twitter (X)
   twitter: {
     card: 'summary_large_image',
     title: 'Alluvi Health-Care UK',
     description: 'Secured & Temperature-Controlled Pharmaceutical Logistics.',
     images: ['/og-image.jpg'],
-    creator: '@alluvihealth',
   },
 
-  // 6. Sécurité et Robots
+  // 6. Robots
   robots: {
     index: true,
     follow: true,
     googleBot: {
       index: true,
       follow: true,
-      'max-video-preview': -1,
       'max-image-preview': 'large',
       'max-snippet': -1,
     },
@@ -65,19 +78,45 @@ export const metadata: Metadata = {
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  // Script de données structurées (JSON-LD) pour rassurer Google sur la légitimité du site
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "MedicalOrganization",
+    "name": "Alluvi Health-Care",
+    "url": "https://alluvihealthcareuk.store",
+    "logo": "https://alluvihealthcareuk.store/logo.png",
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "telephone": "+237-692-118-391",
+      "contactType": "customer service",
+      "areaServed": "GB",
+      "availableLanguage": "en"
+    },
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "London",
+      "addressCountry": "GB"
+    }
+  }
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Couleur de la barre d'adresse sur mobile */}
-        <meta name="theme-color" content="#FFA52F" />
+        {/* Insertion des données structurées */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
       </head>
-      <body className={`${inter.className} antialiased bg-white dark:bg-[#050505] transition-colors duration-300`}>
+      <body className={`${inter.className} antialiased bg-white dark:bg-[#050505] selection:bg-orange-500/30 selection:text-orange-500`}>
         <ThemeProvider 
           attribute="class" 
-          defaultTheme="dark" // Alluvi a l'air mieux en sombre !
-          enableSystem 
+          defaultTheme="dark"
+          enableSystem={false} // On force le dark mode par défaut pour Alluvi
         >
-          {children}
+          <div className="relative flex min-h-screen flex-col">
+            {children}
+          </div>
         </ThemeProvider>
       </body>
     </html>

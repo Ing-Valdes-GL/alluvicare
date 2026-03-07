@@ -295,7 +295,7 @@ export default function HomePage() {
                transition-all duration-300 ease-out"
   >
     {/* Fond Orange qui glisse/apparaît au hover */}
-    <span className="absolute inset-0 bg-[#EF6C00] translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in" />
+    <span className="absolute inset-0 bg-[#EF6C00] translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
 
     {/* Contenu du bouton (Texte + Icône) */}
     <span className="relative z-10 flex items-center gap-3">
@@ -315,7 +315,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <Footer />
+      
       <Footer />
       <style jsx global>{`
         @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
