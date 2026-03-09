@@ -27,9 +27,9 @@ export const metadata: Metadata = {
   authors: [{ name: "Alluvi Health-Care Team" }],
 
   icons: {
-    icon: '/logo-share.png',
-    shortcut: '/logo-share.png',
-    apple: '/logo-share.png',
+    icon: '/public/logo-share.png',
+    shortcut: '/public/logo-share.png',
+    apple: '/public/logo-share.png',
   },
 
   // Configuration Open Graph (WhatsApp, Facebook, LinkedIn)
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     siteName: 'Alluvi Health-Care',
     images: [
       {
-        url: '/logo-share.png', // L'image qui s'affichera lors du partage
+        url: '/public/logo-share.png', // L'image qui s'affichera lors du partage
         width: 1200,
         height: 630,
         alt: 'Alluvi Health-Care Logo',
