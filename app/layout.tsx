@@ -23,13 +23,13 @@ export const metadata: Metadata = {
     google: 'ZXYDUNLP1M2OtoFdtv7y4Fcw0TtJ3wnK7IqSv283wpk',
   },
 
-  keywords: ["pharmaceutical logistics UK", "secure medical delivery", "healthcare distribution", "discreet pharmacy shipping", "BPC-157 UK", "Lab tested research"],
+  keywords: ["pharmaceutical logistics UK", "secure medical delivery", "alluvi healthcare", "alluvi", "Alluvi Health-Care", "alluvi health", "alluvi care", "alluvi uk", "retatrutide", "alluvi retatrutide", "weight loss" , "healthcare distribution", "discreet pharmacy shipping", "BPC-157 UK", "Lab tested research"],
   authors: [{ name: "Alluvi Health-Care Team" }],
 
   icons: {
-    icon: '/favicon.ico',
-    shortcut: '/favicon-32x32.png',
-    apple: '/apple-touch-icon.png',
+    icon: '/logo-share.png',
+    shortcut: '/logo-share.png',
+    apple: '/logo-share.png',
   },
 
   // Configuration Open Graph (WhatsApp, Facebook, LinkedIn)
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     siteName: 'Alluvi Health-Care',
     images: [
       {
-        url: '/og-image.jpg', // L'image qui s'affichera lors du partage
+        url: '/logo-share.png', // L'image qui s'affichera lors du partage
         width: 1200,
         height: 630,
         alt: 'Alluvi Health-Care Logo',
@@ -55,7 +55,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image', // C'est cette ligne qui force l'image en grand
     title: 'Alluvi Health-Care UK',
     description: 'Secured & Temperature-Controlled Pharmaceutical Logistics.',
-    images: ['/og-image.jpg'],
+    images: ['/logo-share.png'],
   },
 
   robots: {
