@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useRef, Suspense } from 'react' // Ajout de Suspense
+import { useEffect, useState, useRef, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase, ChatConversation, ChatMessage } from '@/lib/supabase'
 import { useTheme } from '@/components/ThemeProvider'
@@ -51,15 +51,54 @@ function ChatInterface() {
     }
   }, [conversations, searchParams])
 
+  // GESTION DU REALTIME ET CHARGEMENT DES MESSAGES
   useEffect(() => {
-    if (user && selectedConversation) {
-      const newUrl = new URL(window.location.href)
-      newUrl.searchParams.set('chatId', selectedConversation.id)
-      window.history.pushState({}, '', newUrl)
-      loadMessages()
-      const unsubscribe = subscribeToMessages()
-      markMessagesAsRead()
-      return () => { if (unsubscribe) unsubscribe() }
+    if (!user || !selectedConversation) return;
+
+    // Mise à jour de l'URL
+    const newUrl = new URL(window.location.href)
+    newUrl.searchParams.set('chatId', selectedConversation.id)
+    window.history.pushState({}, '', newUrl)
+    
+    loadMessages()
+    markMessagesAsRead()
+
+    console.log("Admin : Tentative de souscription Realtime pour la conversation :", selectedConversation.id);
+
+    // Initialisation du canal Realtime
+    const channel = supabase
+      .channel(`admin_chat_room_${selectedConversation.id}`)
+      .on(
+        'postgres_changes',
+        { 
+          event: 'INSERT', 
+          schema: 'public', 
+          table: 'chat_messages', 
+          filter: `conversation_id=eq.${selectedConversation.id}` 
+        }, 
+        (payload) => {
+          console.log("Admin : Nouveau message reçu en direct !", payload.new);
+          const newMsg = payload.new as ChatMessage;
+          
+          setMessages((current) => {
+            const exists = current.some(m => m.id === newMsg.id)
+            return exists ? current : [...current, newMsg]
+          })
+
+          // Marquer comme lu si le message vient du client
+          if (newMsg.sender_id !== user.id) {
+            markMessageAsRead(newMsg.id)
+          }
+        }
+      )
+      .subscribe((status) => {
+        console.log("Admin Statut Realtime :", status);
+      });
+
+    // Nettoyage au changement de conversation
+    return () => {
+      console.log("Admin : Fermeture du canal Realtime");
+      supabase.removeChannel(channel)
     }
   }, [user, selectedConversation])
 
@@ -83,7 +122,9 @@ function ChatInterface() {
         .select(`*, profiles!chat_conversations_user_id_fkey (full_name, email, avatar_url)`)
         .eq('status', 'active')
         .order('last_message_at', { ascending: false })
+      
       if (error) throw error
+      
       const validData = (data || []).filter(conv => conv !== null && conv.id)
       const uniqueConversationsMap = new Map()
       validData.forEach((conv: any) => {
@@ -92,6 +133,7 @@ function ChatInterface() {
         }
       })
       const uniqueConversations = Array.from(uniqueConversationsMap.values()) as ConversationWithUser[]
+      
       const conversationsWithUnread = await Promise.all(
         uniqueConversations.map(async (conv) => {
           const { count } = await supabase
@@ -110,33 +152,32 @@ function ChatInterface() {
   const loadMessages = async () => {
     if (!selectedConversation) return
     try {
-      const { data, error } = await supabase.from('chat_messages').select('*').eq('conversation_id', selectedConversation.id).order('created_at', { ascending: true })
+      const { data, error } = await supabase
+        .from('chat_messages')
+        .select('*')
+        .eq('conversation_id', selectedConversation.id)
+        .order('created_at', { ascending: true })
       if (error) throw error
       setMessages(data || [])
     } catch (error) { console.error('Error loading messages:', error) }
   }
 
-  const subscribeToMessages = () => {
-    if (!selectedConversation || !user) return
-    const channel = supabase.channel(`admin-chat:${selectedConversation.id}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `conversation_id=eq.${selectedConversation.id}` }, (payload) => {
-          const newMessage = payload.new as ChatMessage
-          setMessages((current) => [...current, newMessage])
-          if (newMessage.sender_id !== user.id) markMessageAsRead(newMessage.id)
-      }).subscribe()
-    return () => { supabase.removeChannel(channel) }
-  }
-
   const markMessagesAsRead = async () => {
     if (!selectedConversation || !user) return
     try {
-      await supabase.from('chat_messages').update({ is_read: true }).eq('conversation_id', selectedConversation.id).neq('sender_id', user.id).eq('is_read', false)
+      await supabase.from('chat_messages')
+        .update({ is_read: true })
+        .eq('conversation_id', selectedConversation.id)
+        .neq('sender_id', user.id)
+        .eq('is_read', false)
       loadConversations()
     } catch (error) { console.error('Error:', error) }
   }
 
   const markMessageAsRead = async (messageId: string) => {
-    try { await supabase.from('chat_messages').update({ is_read: true }).eq('id', messageId) } catch (error) { console.error('Error:', error) }
+    try { 
+      await supabase.from('chat_messages').update({ is_read: true }).eq('id', messageId) 
+    } catch (error) { console.error('Error:', error) }
   }
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -156,12 +197,16 @@ function ChatInterface() {
     }
   }
 
+  // OPTIMISTIC UI : AJOUT DE .select().single()
   const sendMessage = async (contentOverride?: string, type: 'text' | 'image' = 'text') => {
     const contentToSend = contentOverride || newMessage
-    if (!contentToSend.trim() || !user || !selectedConversation) return
+    if (!contentToSend.trim() || !user || !selectedConversation || sending) return
+
     setSending(true)
+    if (type === 'text') setNewMessage('') // On vide le champ texte immédiatement pour une meilleure UX
+
     try {
-      const { error } = await supabase.from('chat_messages').insert({
+      const { data: insertedMessage, error } = await supabase.from('chat_messages').insert({
           conversation_id: selectedConversation.id,
           sender_id: user.id,
           message_type: type,
@@ -169,11 +214,30 @@ function ChatInterface() {
           file_url: type === 'image' ? contentToSend : null,
           is_read: false
         })
+        .select()
+        .single() // Récupère le message tout de suite après l'insertion
+
       if (error) throw error
-      await supabase.from('chat_conversations').update({ last_message_at: new Date().toISOString(), admin_id: user.id }).eq('id', selectedConversation.id)
-      if (type === 'text') setNewMessage('')
-      loadConversations()
-    } catch (error) { alert('Failed to send message') } finally { setSending(false) }
+
+      // Affichage immédiat pour l'Admin
+      if (insertedMessage) {
+        setMessages(current => {
+          const exists = current.some(m => m.id === insertedMessage.id)
+          return exists ? current : [...current, insertedMessage as ChatMessage]
+        })
+      }
+
+      await supabase.from('chat_conversations')
+        .update({ last_message_at: new Date().toISOString(), admin_id: user.id })
+        .eq('id', selectedConversation.id)
+      
+      loadConversations() // Rafraîchit la barre latérale pour remonter la conversation
+    } catch (error) { 
+      console.error("Failed to send", error)
+      alert('Failed to send message') 
+    } finally { 
+      setSending(false) 
+    }
   }
 
   const scrollToBottom = () => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }) }

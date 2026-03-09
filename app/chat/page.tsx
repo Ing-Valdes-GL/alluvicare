@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useRef, Suspense } from 'react' // Ajout de Suspense
+import { useEffect, useState, useRef, Suspense } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase, ChatMessage, ChatConversation } from '@/lib/supabase'
 import { useTheme } from '@/components/ThemeProvider'
@@ -8,7 +8,6 @@ import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { Send, Paperclip, Check, CheckCheck, MessageSquare, Shield, Info } from 'lucide-react'
 
-// 1. On déplace toute la logique dans un composant interne
 function ChatContent() {
   const { theme } = useTheme()
   const router = useRouter()
@@ -23,18 +22,52 @@ function ChatContent() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  // 1. Vérifier l'utilisateur au montage
   useEffect(() => {
     checkUser()
   }, [])
 
+  // 2. Charger les messages ET s'abonner au Realtime une fois la conversation trouvée
   useEffect(() => {
-    if (user && conversation) {
-      loadMessages()
-      const channel = subscribeToRealtime()
-      return () => { supabase.removeChannel(channel) }
+    if (!user || !conversation) return;
+
+    loadMessages()
+
+    console.log("Tentative de souscription Realtime pour la conversation :", conversation.id);
+
+    const channel = supabase
+      .channel(`chat_room_${conversation.id}`)
+      .on(
+        'postgres_changes',
+        { 
+          event: 'INSERT', 
+          schema: 'public', 
+          table: 'chat_messages', 
+          filter: `conversation_id=eq.${conversation.id}` 
+        }, 
+        (payload) => {
+          console.log("Nouveau message reçu en direct !", payload.new);
+          const newMsg = payload.new as ChatMessage;
+          
+          setMessages((current) => {
+            // Éviter les doublons si on a déjà ajouté le message localement
+            const exists = current.some(m => m.id === newMsg.id)
+            return exists ? current : [...current, newMsg]
+          })
+        }
+      )
+      .subscribe((status) => {
+        console.log("Statut Realtime :", status); // Doit afficher "SUBSCRIBED"
+      })
+
+    // Nettoyage à la destruction du composant
+    return () => {
+      console.log("Fermeture du canal Realtime");
+      supabase.removeChannel(channel)
     }
   }, [user, conversation])
 
+  // 3. Auto-scroll vers le bas
   useEffect(() => {
     scrollToBottom()
   }, [messages])
@@ -85,27 +118,6 @@ function ChatContent() {
     setMessages(data || [])
   }
 
-  const subscribeToRealtime = () => {
-    const channel = supabase.channel(`chat:${conversation?.id}`)
-    
-    channel
-      .on('postgres_changes', { 
-        event: 'INSERT', 
-        schema: 'public', 
-        table: 'chat_messages', 
-        filter: `conversation_id=eq.${conversation?.id}` 
-      }, (payload) => {
-        const newMsg = payload.new as ChatMessage
-        setMessages((current) => {
-          const exists = current.some(m => m.id === newMsg.id)
-          return exists ? current : [...current, newMsg]
-        })
-      })
-      .subscribe()
-
-    return channel
-  }
-
   const sendMessage = async () => {
     if (!newMessage.trim() || !user || !conversation || sending) return
 
@@ -114,14 +126,27 @@ function ChatContent() {
     setSending(true)
 
     try {
-      const { error } = await supabase.from('chat_messages').insert({
-        conversation_id: conversation.id,
-        sender_id: user.id,
-        message_type: 'text',
-        content: content
-      })
+      // AJOUT CRUCIAL : On récupère la ligne insérée avec .select().single()
+      const { data: insertedMessage, error } = await supabase
+        .from('chat_messages')
+        .insert({
+          conversation_id: conversation.id,
+          sender_id: user.id,
+          message_type: 'text',
+          content: content
+        })
+        .select()
+        .single()
 
       if (error) throw error
+
+      // On affiche le message pour l'expéditeur tout de suite
+      if (insertedMessage) {
+        setMessages(current => {
+          const exists = current.some(m => m.id === insertedMessage.id)
+          return exists ? current : [...current, insertedMessage as ChatMessage]
+        })
+      }
 
       await supabase.from('chat_conversations')
         .update({ last_message_at: new Date().toISOString() })
@@ -129,7 +154,7 @@ function ChatContent() {
 
     } catch (error: any) {
       console.error("Failed to send:", error)
-      setNewMessage(content)
+      setNewMessage(content) // Remet le texte si ça échoue
     } finally {
       setSending(false)
     }
@@ -148,13 +173,23 @@ function ChatContent() {
 
       const { data: { publicUrl } } = supabase.storage.from('chat-images').getPublicUrl(fileName)
       
-      await supabase.from('chat_messages').insert({
+      const { data: insertedImageMsg, error } = await supabase.from('chat_messages').insert({
         conversation_id: conversation.id,
         sender_id: user.id,
         message_type: 'image',
         file_url: publicUrl,
         content: 'Image attachment'
-      })
+      }).select().single()
+
+      if (error) throw error
+
+      if (insertedImageMsg) {
+         setMessages(current => {
+          const exists = current.some(m => m.id === insertedImageMsg.id)
+          return exists ? current : [...current, insertedImageMsg as ChatMessage]
+        })
+      }
+
     } catch (e) {
       alert("Upload failed")
     } finally {
@@ -280,7 +315,6 @@ function ChatContent() {
   )
 }
 
-// 2. Export par défaut avec Suspense
 export default function ChatPage() {
   return (
     <Suspense fallback={<div className="min-h-screen bg-black flex items-center justify-center italic text-[#FFA52F] uppercase text-xs tracking-widest">Initializing Secure Channel...</div>}>
