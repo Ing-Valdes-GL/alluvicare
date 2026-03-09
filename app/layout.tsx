@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     siteName: 'Alluvi Health-Care',
     images: [
       {
-        url: '/favicon.ico', // L'image qui s'affichera lors du partage
+        url: '/', // L'image qui s'affichera lors du partage
         width: 1200,
         height: 630,
         alt: 'Alluvi Health-Care Logo',
@@ -58,6 +58,13 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+
+  icons: {
+    icon: '/logo-share.png',
+    shortcut: '/logo-share.png',
+    apple: '/logo-share.png',
+  },
+
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
