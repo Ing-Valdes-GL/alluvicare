@@ -13,7 +13,6 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  // Titre par défaut (utilisé si une page n'en définit pas un via useEffect)
   title: "Alluvi Health-Care | Secured Pharmaceutical Logistics UK",
   description: "Alluvi Health-Care provides licensed, temperature-controlled, and discreet pharmaceutical logistics across the UK. Secure healthcare distribution with blockchain-grade tracking.",
   
@@ -23,12 +22,21 @@ export const metadata: Metadata = {
     google: 'ZXYDUNLP1M2OtoFdtv7y4Fcw0TtJ3wnK7IqSv283wpk',
   },
 
-  keywords: ["pharmaceutical logistics UK", "secure medical delivery", "alluvi healthcare", "alluvi", "Alluvi Health-Care", "alluvi health", "alluvi care", "alluvi uk", "retatrutide", "alluvi retatrutide", "weight loss" , "healthcare distribution", "discreet pharmacy shipping", "BPC-157 UK", "Lab tested research"],
+  keywords: ["pharmaceutical logistics UK", "secure medical delivery", "alluvi healthcare", "alluvi", "Alluvi Health-Care", "alluvi health", "alluvi care", "alluvi uk", "retatrutide", "weight loss", "healthcare distribution", "discreet pharmacy shipping"],
   authors: [{ name: "Alluvi Health-Care Team" }],
 
+  // CONFIGURATION DES ICONES (Pour Google et les navigateurs)
+  icons: {
+    icon: [
+      { url: '/logo-share.png', type: 'image/png', sizes: '32x32' },
+      { url: '/logo-share.png', type: 'image/png', sizes: '192x192' },
+    ],
+    shortcut: '/logo-share.png',
+    apple: [
+      { url: '/logo-share.png', sizes: '180x180', type: 'image/png' },
+    ],
+  },
 
-
-  // Configuration Open Graph (WhatsApp, Facebook, LinkedIn)
   openGraph: {
     title: "Alluvi Health-Care | Professional Medical Logistics",
     description: "Secure & Discreet Pharmaceutical Delivery Services across the UK.",
@@ -36,7 +44,7 @@ export const metadata: Metadata = {
     siteName: 'Alluvi Health-Care',
     images: [
       {
-        url: '/', // L'image qui s'affichera lors du partage
+        url: '/logo-share.png', 
         width: 1200,
         height: 630,
         alt: 'Alluvi Health-Care Logo',
@@ -46,9 +54,8 @@ export const metadata: Metadata = {
     type: 'website',
   },
 
-  // Configuration Twitter/X pour l'image en GRAND
   twitter: {
-    card: 'summary_large_image', // C'est cette ligne qui force l'image en grand
+    card: 'summary_large_image',
     title: 'Alluvi Health-Care UK',
     description: 'Secured & Temperature-Controlled Pharmaceutical Logistics.',
     images: ['/logo-share.png'],
@@ -58,13 +65,6 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
-
-  icons: {
-    icon: '/logo-share.png',
-    shortcut: '/logo-share.png',
-    apple: '/logo-share.png',
-  },
-
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -73,7 +73,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     "@type": "MedicalOrganization",
     "name": "Alluvi Health-Care",
     "url": "https://alluvihealthcareuk.store",
-    "logo": "https://alluvihealthcareuk.store/favicon.ico",
+    "logo": "https://alluvihealthcareuk.store/logo-share.png",
     "contactPoint": {
       "@type": "ContactPoint",
       "telephone": "+44 7818576208",
@@ -91,6 +91,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        {/* FORCER LE FAVICON POUR GOOGLE (Méthode directe) */}
+        <link rel="icon" href="/logo-share.png" type="image/png" sizes="32x32" />
+        <link rel="apple-touch-icon" href="/logo-share.png" />
+        
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
