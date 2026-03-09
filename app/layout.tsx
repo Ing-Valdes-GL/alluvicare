@@ -28,8 +28,8 @@ export const metadata: Metadata = {
   // CONFIGURATION DES ICONES (Pour Google et les navigateurs)
   icons: {
     icon: [
-      { url: '/logo-share.png', type: 'image/png', sizes: '32x32' },
-      { url: '/logo-share.png', type: 'image/png', sizes: '192x192' },
+      { url: 'https://alluvihealthcareuk.store/favicon.ico', type: 'image/ico', sizes: '48x48' },
+      { url: 'https://alluvihealthcareuk.store/logo-share.png', type: 'image/png', sizes: '192x192' },
     ],
     shortcut: '/logo-share.png',
     apple: [
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     siteName: 'Alluvi Health-Care',
     images: [
       {
-        url: '/logo-share.png', 
+        url: 'https://alluvihealthcareuk.store/logo-share.png', 
         width: 1200,
         height: 630,
         alt: 'Alluvi Health-Care Logo',
@@ -73,7 +73,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     "@type": "MedicalOrganization",
     "name": "Alluvi Health-Care",
     "url": "https://alluvihealthcareuk.store",
-    "logo": "https://alluvihealthcareuk.store/logo-share.png",
+    "logo": "https://alluvihealthcareuk.store/favicon.ico",
     "contactPoint": {
       "@type": "ContactPoint",
       "telephone": "+44 7818576208",
@@ -92,7 +92,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning>
       <head>
         {/* FORCER LE FAVICON POUR GOOGLE (Méthode directe) */}
-        <link rel="icon" href="/logo-share.png" type="image/png" sizes="32x32" />
+        <link rel="icon" href="/favicon.ico" type="image/ico" sizes="48x48" />
         <link rel="apple-touch-icon" href="/logo-share.png" />
         
         <script
