@@ -39,7 +39,9 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-white text-[#0A0A0B]">
       <Header />
-
+<head>
+        <meta name="robots" content="noindex, follow" />
+      </head>
 {/* --- HERO SECTION : REPRODUCTION EXACTE MAQUETTE --- */}
 <section className="relative bg-[#050505] min-h-[85vh] flex items-center justify-center overflow-hidden">
   
