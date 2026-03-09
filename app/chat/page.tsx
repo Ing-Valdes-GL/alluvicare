@@ -86,25 +86,35 @@ function ChatContent() {
   }
 
   const subscribeToRealtime = () => {
-    const channel = supabase.channel(`chat:${conversation?.id}`)
-    
-    channel
-      .on('postgres_changes', { 
-        event: 'INSERT', 
-        schema: 'public', 
-        table: 'chat_messages', 
-        filter: `conversation_id=eq.${conversation?.id}` 
-      }, (payload) => {
-        const newMsg = payload.new as ChatMessage
-        setMessages((current) => {
-          const exists = current.some(m => m.id === newMsg.id)
-          return exists ? current : [...current, newMsg]
-        })
-      })
-      .subscribe()
+    // On crée un canal unique pour cette conversation
+    const channel = supabase
+      .channel(`room_conversion_${conversation?.id}`) 
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'chat_messages',
+          // On s'assure que le message appartient à cette conversation
+          filter: `conversation_id=eq.${conversation?.id}`,
+        },
+        (payload) => {
+          console.log('Nouveau message reçu en temps réel:', payload);
+          const newMsg = payload.new as ChatMessage;
+          
+          setMessages((current) => {
+            // Éviter les doublons si l'insert local a déjà eu lieu
+            if (current.find(m => m.id === newMsg.id)) return current;
+            return [...current, newMsg];
+          });
+        }
+      )
+      .subscribe((status) => {
+        console.log("Statut de la connexion Realtime:", status);
+      });
 
-    return channel
-  }
+    return channel;
+  };
 
   const sendMessage = async () => {
     if (!newMessage.trim() || !user || !conversation || sending) return

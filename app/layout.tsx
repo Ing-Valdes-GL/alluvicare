@@ -26,11 +26,7 @@ export const metadata: Metadata = {
   keywords: ["pharmaceutical logistics UK", "secure medical delivery", "alluvi healthcare", "alluvi", "Alluvi Health-Care", "alluvi health", "alluvi care", "alluvi uk", "retatrutide", "alluvi retatrutide", "weight loss" , "healthcare distribution", "discreet pharmacy shipping", "BPC-157 UK", "Lab tested research"],
   authors: [{ name: "Alluvi Health-Care Team" }],
 
-  icons: {
-    icon: '/public/logo-share.png',
-    shortcut: '/public/logo-share.png',
-    apple: '/public/logo-share.png',
-  },
+
 
   // Configuration Open Graph (WhatsApp, Facebook, LinkedIn)
   openGraph: {
@@ -40,7 +36,7 @@ export const metadata: Metadata = {
     siteName: 'Alluvi Health-Care',
     images: [
       {
-        url: '/public/logo-share.png', // L'image qui s'affichera lors du partage
+        url: '/favicon.ico', // L'image qui s'affichera lors du partage
         width: 1200,
         height: 630,
         alt: 'Alluvi Health-Care Logo',
