@@ -12,7 +12,7 @@ export async function POST(req: Request) {
       subtotal, discount, shipping, total, paymentMethod, address 
     } = orderData;
 
-    // Génération de la liste des produits en HTML
+    // 1. Génération de la liste des produits en HTML
     const itemsHtml = items.map((item: any) => `
       <tr>
         <td style="padding: 8px; border-bottom: 1px solid #eee;">${item.name} <br><strong>× ${item.quantity}</strong></td>
@@ -20,6 +20,7 @@ export async function POST(req: Request) {
       </tr>
     `).join('');
 
+    // 2. Préparation du contenu HTML (Ton design original)
     const htmlContent = `
       <div style="font-family: sans-serif; max-width: 600px; margin: auto; color: #333;">
         <h1 style="color: #FFA52F;">Thank you for your order</h1>
@@ -64,22 +65,30 @@ export async function POST(req: Request) {
         </div>
 
         <p style="margin-top: 40px; font-size: 14px; color: #777;">
-          Thanks again! If you need any help with your order, please contact us at <a href="/chat" style="color: #FFA52F;">support@alluvicare.com</a>.<br>
+          Thanks again! If you need any help with your order, please contact us at <a href="https://alluvihealthcareuk.store/chat" style="color: #FFA52F;">support@alluvihealthcareuk.store</a>.<br>
           <strong>Alluvi Health care</strong><br>
           United Kingdom (UK).
         </p>
       </div>
     `;
 
+    // 3. Liste des destinataires (Client + les 3 Admins)
+    const recipients = [
+      email, // L'utilisateur
+      'alluvihealthcare42@gmail.com'
+    ];
+
+    // 4. Envoi unique à tout le monde
     const data = await resend.emails.send({
-      from: 'Alluvicare Orders <support@alluvihealthcareuk.store>', // Remplace par ton domaine vérifié sur Resend
-      to: [email],
-      subject: `Your Alluvicare Order Receipt #${orderRef}`,
+      from: 'Alluvicare Orders <support@alluvihealthcareuk.store>',
+      to: recipients,
+      subject: `Order Confirmation #${orderRef} - Alluvicare`,
       html: htmlContent,
     });
 
     return NextResponse.json(data);
   } catch (error) {
-    return NextResponse.json({ error });
+    console.error("Resend Error:", error);
+    return NextResponse.json({ error }, { status: 500 });
   }
 }

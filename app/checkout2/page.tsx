@@ -1,18 +1,19 @@
 'use client'
 
-import { useEffect, useState, Suspense } from 'react' // Ajout de Suspense
-import { useSearchParams } from 'next/navigation'
+import { useEffect, useState, Suspense } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation' // Ajout de useRouter
 import { supabase } from '@/lib/supabase'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 
-// 1. On déplace la logique dans un composant interne
 function CheckoutDetails() {
   const searchParams = useSearchParams()
+  const router = useRouter() // Pour la redirection
   const orderId = searchParams.get('orderId')
   const [order, setOrder] = useState<any>(null)
   const [items, setItems] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [isSending, setIsSending] = useState(false)
 
   useEffect(() => {
     async function fetchOrderDetails() {
@@ -37,6 +38,26 @@ function CheckoutDetails() {
     fetchOrderDetails()
   }, [orderId])
 
+  // --- NOUVELLE FONCTION POUR LE CHAT ---
+  const handleSupportClick = async () => {
+    if (!order) return
+    setIsSending(true)
+
+    const orderRef = order.reference_code || order.id.slice(0, 8)
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (user) {
+      // Insertion du message automatique dans le chat
+      await supabase.from('messages').insert({
+        content: `Hello, I have a payment inquiry regarding my order #${orderRef}. Could you please assist me?`,
+        user_id: user.id,
+      })
+    }
+
+    // Redirection vers la page de chat
+    router.push('/chat')
+  }
+
   if (loading) return <div className="p-20 text-center font-black uppercase tracking-widest opacity-30">Loading your receipt...</div>
   if (!order) return <div className="p-20 text-center font-black uppercase tracking-widest opacity-30">Order not found.</div>
 
@@ -48,6 +69,20 @@ function CheckoutDetails() {
         <h1 className="text-5xl font-black text-slate-800 mb-8 tracking-tight">
           Thank You. Your Order Has Been Received.
         </h1>
+
+        {/* --- BOUTON CONTACT SUPPORT --- */}
+        <div className="mb-10">
+          <button 
+            onClick={handleSupportClick}
+            disabled={isSending}
+            className="bg-orange-500 hover:bg-orange-600 text-white font-black py-4 px-8 rounded-sm uppercase tracking-widest text-xs transition-all flex items-center gap-3 shadow-lg shadow-orange-500/20 disabled:opacity-50"
+          >
+            {isSending ? 'Connecting...' : 'Contact Support for Payment Inquiries'}
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+          </button>
+        </div>
 
         <div className="flex flex-wrap gap-8 mb-12 text-sm border-b border-slate-100 pb-8">
           <div>
@@ -70,6 +105,7 @@ function CheckoutDetails() {
           </div>
         </div>
 
+        {/* ... Le reste du tableau reste identique ... */}
         <div className="border border-slate-100 rounded-sm p-8 shadow-sm">
           <h2 className="text-4xl font-black text-slate-900 mb-8">Order Details</h2>
           
@@ -124,7 +160,6 @@ function CheckoutDetails() {
   )
 }
 
-// 2. Export principal avec Suspense
 export default function Checkout2() {
   return (
     <Suspense fallback={
