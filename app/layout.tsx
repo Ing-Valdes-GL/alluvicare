@@ -13,7 +13,10 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: "Alluvi Health-Care | Secured Pharmaceutical Logistics UK",
+  title: {
+    default: "Alluvi Health-Care | Secured Pharmaceutical Logistics UK",
+    template: "%s | Alluvi Health-Care" 
+  },
   description: "Premium research peptides: BCP-157, TB-500, Retatrutide, Tizepatide. Janoshik tested, cold chain delivery, tracked uk, shipping for lab R&D",
   
   metadataBase: new URL('https://alluvihealthcareuk.store'), 
