@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     siteName: 'Alluvi Health-Care',
     images: [
       {
-        url: 'favicon.ico', 
+        url: '/favicon.ico', 
         width: 1200,
         height: 630,
         alt: 'Alluvi Health-Care Logo',
