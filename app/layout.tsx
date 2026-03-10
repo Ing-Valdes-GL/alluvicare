@@ -25,8 +25,6 @@ export const metadata: Metadata = {
   keywords: ["pharmaceutical logistics UK", "secure medical delivery", "alluvi healthcare", "alluvi", "Alluvi Health-Care", "alluvi health", "alluvi care", "alluvi uk", "retatrutide", "weight loss", "healthcare distribution", "discreet pharmacy shipping"],
   authors: [{ name: "Alluvi Health-Care Team" }],
 
-  // CONFIGURATION DES ICONES (Pour Google et les navigateurs)
-
   openGraph: {
     title: "Alluvi Health-Care | Professional Medical Logistics",
     description: "Secure & Discreet Pharmaceutical Delivery Services across the UK.",
@@ -34,7 +32,7 @@ export const metadata: Metadata = {
     siteName: 'Alluvi Health-Care',
     images: [
       {
-        url: '/favicon.ico', 
+        url: '/logo-share.png', 
         width: 1200,
         height: 630,
         alt: 'Alluvi Health-Care Logo',
@@ -55,9 +53,17 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
-    icons: {
-    icon: '/favicon.ico',
-    apple: '/apple-touch-icon.png',
+
+  // CONFIGURATION DES ICONES OPTIMISÉE POUR GOOGLE
+  icons: {
+    icon: [
+      { url: '/logo-share.png', type: 'image/png', sizes: '32x32' },
+      { url: '/logo-share.png', type: 'image/png', sizes: '192x192' },
+    ],
+    shortcut: '/logo-share.png',
+    apple: [
+      { url: '/logo-share.png', sizes: '180x180', type: 'image/png' },
+    ],
   },
 }
 
@@ -67,7 +73,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     "@type": "MedicalOrganization",
     "name": "Alluvi Health-Care",
     "url": "https://alluvihealthcareuk.store",
-    "logo": "https://alluvihealthcareuk.store/favicon.ico",
+    // Utilisation du PNG ici aussi pour la cohérence
+    "logo": "https://alluvihealthcareuk.store/logo-share.png", 
     "contactPoint": {
       "@type": "ContactPoint",
       "telephone": "+44 7818576208",
@@ -85,8 +92,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* FORCER LE FAVICON POUR GOOGLE (Méthode directe) */}
-        <link rel="icon" href="/favicon.ico" type="image/ico" sizes="48x48" />
+        {/* Rappel direct pour le bot Google Favicon */}
+        <link rel="icon" href="/logo-share.png" type="image/png" sizes="192x192" />
+        <link rel="shortcut icon" href="/logo-share.png" type="image/png" />
         <link rel="apple-touch-icon" href="/logo-share.png" />
         
         <script
