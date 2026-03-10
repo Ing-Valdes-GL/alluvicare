@@ -28,7 +28,7 @@ export default function HomePage() {
         .from('products')
         .select('*')
         .eq('is_active', true)
-        .limit(3)
+        .limit(4)
       setProducts(data || [])
       setLoading(false)
     }

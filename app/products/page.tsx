@@ -27,9 +27,7 @@ function ProductListContent() {
   // GESTION DYNAMIQUE DU SEO (Remplace l'export metadata)
   useEffect(() => {
     // Mise à jour du Titre
-    document.title = filterPromo 
-      ? "Exclusive Research Deals | Alluvi Health Care" 
-      : "Retatrutite Products & Research Compounds | Alluvi Health Care";
+    document.title = "Retatrutite Products & Research Compounds | Alluvi Health Care";
     
     // Mise à jour de la Description
     const metaDesc = document.querySelector('meta[name="description"]');

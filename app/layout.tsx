@@ -14,7 +14,7 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: "Alluvi Health-Care | Secured Pharmaceutical Logistics UK",
-  description: "Alluvi Health-Care provides licensed, temperature-controlled, and discreet pharmaceutical logistics across the UK. Secure healthcare distribution with blockchain-grade tracking.",
+  description: "Premium research peptides: BCP-157, TB-500, Retatrutide, Tizepatide. Janoshik tested, cold chain delivery, tracked uk, shipping for lab R&D",
   
   metadataBase: new URL('https://alluvihealthcareuk.store'), 
 
@@ -26,16 +26,6 @@ export const metadata: Metadata = {
   authors: [{ name: "Alluvi Health-Care Team" }],
 
   // CONFIGURATION DES ICONES (Pour Google et les navigateurs)
-  icons: {
-    icon: [
-      { url: 'https://alluvihealthcareuk.store/favicon.ico', type: 'image/ico', sizes: '48x48' },
-      { url: 'https://alluvihealthcareuk.store/logo-share.png', type: 'image/png', sizes: '192x192' },
-    ],
-    shortcut: '/logo-share.png',
-    apple: [
-      { url: '/logo-share.png', sizes: '180x180', type: 'image/png' },
-    ],
-  },
 
   openGraph: {
     title: "Alluvi Health-Care | Professional Medical Logistics",
@@ -44,7 +34,7 @@ export const metadata: Metadata = {
     siteName: 'Alluvi Health-Care',
     images: [
       {
-        url: 'https://alluvihealthcareuk.store/logo-share.png', 
+        url: 'favicon.ico', 
         width: 1200,
         height: 630,
         alt: 'Alluvi Health-Care Logo',
@@ -64,6 +54,10 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
+  },
+    icons: {
+    icon: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
   },
 }
 
