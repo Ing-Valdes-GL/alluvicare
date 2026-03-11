@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://alluvihealthcareuk.store'), 
 
   verification: {
-    google: 'ZXYDUNLP1M2OtoFdtv7y4Fcw0TtJ3wnK7IqSv283wpk',
+    google: '2hbWEWdI2DGbgMkCZ5FFOk-1Jc1gjsYmlFBWSiFS0-s',
   },
 
   keywords: ["pharmaceutical logistics UK", "secure medical delivery", "alluvi healthcare", "alluvi", "Alluvi Health-Care", "alluvi health", "alluvi care", "alluvi uk", "retatrutide", "weight loss", "healthcare distribution", "discreet pharmacy shipping"],
