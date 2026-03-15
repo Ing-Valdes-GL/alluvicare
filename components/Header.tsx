@@ -69,9 +69,11 @@ export default function Header() {
   ]
 
   return (
+    
     <header className={`sticky top-0 z-50 w-full border-b transition-all duration-300 ${
       theme === 'dark' ? 'bg-black/80 border-white/5 text-white' : 'bg-white/90 border-gray-100 text-gray-900'
     } backdrop-blur-md`}>
+      
       <div className="container mx-auto px-4 h-20 flex items-center justify-between">
         
         {/* LOGO */}

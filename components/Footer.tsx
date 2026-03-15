@@ -105,29 +105,31 @@ export default function Footer() {
                 </div>
               </li>
 
-              <li className="flex items-center gap-5 group">
-                <a href="https://wa.me/+44 7818576208" target="_blank" rel="noopener noreferrer" className="flex items-center gap-5">
-                  <div className={`p-4 rounded-2xl transition-all ${theme === 'dark' ? 'bg-gray-900 group-hover:bg-green-500' : 'bg-gray-100 group-hover:bg-green-500'} group-hover:text-white`}>
-                    <Phone size={20} />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-[10px] font-black uppercase tracking-widest opacity-40">Direct Line</span>
-                    <span className="text-xs font-black uppercase tracking-widest">WhatsApp Support</span>
-                  </div>
-                </a>
-              </li>
 
-              <li className="flex items-center gap-5 group">
-                <a href="https://t.me/+44 7818576208" target="_blank" rel="noopener noreferrer" className="flex items-center gap-5">
-                  <div className={`p-4 rounded-2xl transition-all ${theme === 'dark' ? 'bg-gray-900 group-hover:bg-blue-500' : 'bg-gray-100 group-hover:bg-blue-500'} group-hover:text-white`}>
-                    <MessageCircle size={20} />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-[10px] font-black uppercase tracking-widest opacity-40">Community</span>
-                    <span className="text-xs font-black uppercase tracking-widest">Telegram Channel</span>
-                  </div>
-                </a>
-              </li>
+
+<li className="flex items-center gap-5 group">
+  <a href="https://wa.me/447818576208" target="_blank" rel="noopener noreferrer" className="flex items-center gap-5">
+    <div className={`p-4 rounded-2xl transition-all ${theme === 'dark' ? 'bg-gray-900 group-hover:bg-green-500' : 'bg-gray-100 group-hover:bg-green-500'} group-hover:text-white`}>
+      <Phone size={20} />
+    </div>
+    <div className="flex flex-col">
+      <span className="text-[10px] font-black uppercase tracking-widest opacity-40">Direct Line</span>
+      <span className="text-xs font-black uppercase tracking-widest">WhatsApp Support</span>
+    </div>
+  </a>
+</li>
+
+<li className="flex items-center gap-5 group">
+  <a href="https://t.me/AlluviSupport" target="_blank" rel="noopener noreferrer" className="flex items-center gap-5">
+    <div className={`p-4 rounded-2xl transition-all ${theme === 'dark' ? 'bg-gray-900 group-hover:bg-blue-500' : 'bg-gray-100 group-hover:bg-blue-500'} group-hover:text-white`}>
+      <MessageCircle size={20} />
+    </div>
+    <div className="flex flex-col">
+      <span className="text-[10px] font-black uppercase tracking-widest opacity-40">Community</span>
+      <span className="text-xs font-black uppercase tracking-widest">Telegram Channel</span>
+    </div>
+  </a>
+</li>
 
               <li className="flex items-center gap-5 group pt-4">
                 <div className={`p-4 rounded-2xl ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'} text-orange-500`}>
