@@ -35,9 +35,9 @@ export const metadata: Metadata = {
     siteName: 'Alluvi Health-Care',
     images: [
       {
-        url: '/favicon.ico', 
-        width: 1200,
-        height: 630,
+        url: '/logo-share.png',
+        width: 512,
+        height: 512,
         alt: 'Alluvi Health-Care Logo',
       },
     ],
@@ -57,13 +57,14 @@ export const metadata: Metadata = {
     follow: true,
   },
 
-  // CONFIGURATION DES ICONES OPTIMISÉE POUR GOOGLE
+  // Favicon optimisé pour Google (recommandation: 48x48 minimum, carré, PNG/ICO)
   icons: {
     icon: [
+      { url: '/favicon.ico', type: 'image/x-icon', sizes: '48x48' },
       { url: '/logo-share.png', type: 'image/png', sizes: '32x32' },
       { url: '/logo-share.png', type: 'image/png', sizes: '192x192' },
     ],
-    shortcut: '/logo-share.png',
+    shortcut: '/favicon.ico',
     apple: [
       { url: '/logo-share.png', sizes: '180x180', type: 'image/png' },
     ],
@@ -95,10 +96,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Rappel direct pour le bot Google Favicon */}
+        {/* Favicon prioritaire pour Google (demande souvent /favicon.ico) */}
+        <link rel="icon" href="/favicon.ico" sizes="48x48" />
         <link rel="icon" href="/logo-share.png" type="image/png" sizes="192x192" />
-        <link rel="shortcut icon" href="/logo-share.png" type="image/png" />
-        <link rel="apple-touch-icon" href="/logo-share.png" />
+        <link rel="apple-touch-icon" href="/logo-share.png" sizes="180x180" />
         
         <script
           type="application/ld+json"
