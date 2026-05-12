@@ -108,7 +108,8 @@ export default function Footer() {
 
 
 <li className="flex items-center gap-5 group">
-  <a href="https://wa.me/447818576208" target="_blank" rel="noopener noreferrer" className="flex items-center gap-5">
+  {/* Suppression des parenthèses et du + pour WhatsApp */}
+  <a href="https://wa.me/16504006481" target="_blank" rel="noopener noreferrer" className="flex items-center gap-5">
     <div className={`p-4 rounded-2xl transition-all ${theme === 'dark' ? 'bg-gray-900 group-hover:bg-green-500' : 'bg-gray-100 group-hover:bg-green-500'} group-hover:text-white`}>
       <Phone size={20} />
     </div>
@@ -120,7 +121,8 @@ export default function Footer() {
 </li>
 
 <li className="flex items-center gap-5 group">
-  <a href="https://t.me/AlluviSupport" target="_blank" rel="noopener noreferrer" className="flex items-center gap-5">
+  {/* Format Telegram sans parenthèses ni espaces */}
+  <a href="https://t.me/+16504006481" target="_blank" rel="noopener noreferrer" className="flex items-center gap-5">
     <div className={`p-4 rounded-2xl transition-all ${theme === 'dark' ? 'bg-gray-900 group-hover:bg-blue-500' : 'bg-gray-100 group-hover:bg-blue-500'} group-hover:text-white`}>
       <MessageCircle size={20} />
     </div>
