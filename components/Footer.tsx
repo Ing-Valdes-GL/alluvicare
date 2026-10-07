@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Activity, Mail, Phone, MapPin, ShieldCheck, ArrowRight, MessageCircle, Send } from 'lucide-react'
+import { Activity, Mail, MapPin, ShieldCheck, ArrowRight, Send } from 'lucide-react'
 import { useTheme } from '@/components/ThemeProvider'
 
 export default function Footer() {
@@ -104,35 +104,6 @@ export default function Footer() {
                   <a href="/chat" className="text-xs font-black uppercase tracking-widest hover:text-orange-500">support@Alluvi.com</a>
                 </div>
               </li>
-
-
-
-<li className="flex items-center gap-5 group">
-  {/* Suppression des parenthèses et du + pour WhatsApp */}
-  <a href="https://wa.me/+447491043332" target="_blank" rel="noopener noreferrer" className="flex items-center gap-5">
-    <div className={`p-4 rounded-2xl transition-all ${theme === 'dark' ? 'bg-gray-900 group-hover:bg-green-500' : 'bg-gray-100 group-hover:bg-green-500'} group-hover:text-white`}>
-      <Phone size={20} />
-    </div>
-    <div className="flex flex-col">
-      <span className="text-[10px] font-black uppercase tracking-widest opacity-40">Direct Line</span>
-      <span className="text-xs font-black uppercase tracking-widest">WhatsApp Support</span>
-    </div>
-  </a>
-</li>
-
-<li className="flex items-center gap-5 group">
-  {/* Format Telegram sans parenthèses ni espaces */}
-  <a href="https://t.me/+447491043332" target="_blank" rel="noopener noreferrer" className="flex items-center gap-5">
-    <div className={`p-4 rounded-2xl transition-all ${theme === 'dark' ? 'bg-gray-900 group-hover:bg-blue-500' : 'bg-gray-100 group-hover:bg-blue-500'} group-hover:text-white`}>
-      <MessageCircle size={20} />
-    </div>
-    <div className="flex flex-col">
-      <span className="text-[10px] font-black uppercase tracking-widest opacity-40">Community</span>
-      <span className="text-xs font-black uppercase tracking-widest">Telegram Channel</span>
-    </div>
-  </a>
-</li>
-
               <li className="flex items-center gap-5 group pt-4">
                 <div className={`p-4 rounded-2xl ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'} text-orange-500`}>
                   <MapPin size={20} />
