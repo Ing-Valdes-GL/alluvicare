@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Footer from '@/components/Footer'
+import { AuthButton } from '@/components/AuthButton'
 import { Tilt3D } from '@/components/motion/Tilt3D'
 import { SplitText } from '@/components/motion/SplitText'
 import { EASE_OUT } from '@/components/motion/tokens'
@@ -144,7 +145,8 @@ export default function ProductListContent() {
             </button>
           </div>
 
-          <div className="flex items-center gap-5">
+          <div className="flex items-center gap-3 md:gap-5">
+            <AuthButton tone="light" />
             <Link href="/cart" className="relative group p-2" aria-label="View Cart">
               <ShoppingCart size={24} className="text-gray-700 group-hover:text-[#EF6C00] transition-colors" />
               <AnimatePresence>

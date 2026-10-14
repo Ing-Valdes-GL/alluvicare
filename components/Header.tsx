@@ -12,12 +12,15 @@ import { useTheme } from "./ThemeProvider"
 import { EASE_OUT, SPRING_SNAPPY } from "./motion/tokens"
 import { supabase } from "@/lib/supabase"
 import { isAdminEmail } from '@/lib/admin'
+import { useSession } from '@/lib/use-session'
+import { AuthButton } from './AuthButton'
 
 export default function Header() {
   const { theme, toggleTheme } = useTheme()
   const pathname = usePathname()
   const [isAdmin, setIsAdmin] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const { user } = useSession()
   
   // --- HEADER APPLE : se masque en descendant, réapparaît en remontant ---
   const { scrollY } = useScroll()
@@ -51,28 +54,30 @@ export default function Header() {
     // Écouter les changements venant d'autres onglets
     window.addEventListener('storage', updateCartBadge)
 
-    const checkAdmin = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (session?.user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('is_admin')
-          .eq('id', session.user.id)
-          .single()
-        
-        const isEmailAdmin = isAdminEmail(session.user.email)
-        setIsAdmin(!!profile?.is_admin || isEmailAdmin)
-      }
-    }
-
-    checkAdmin()
-
     // Nettoyage des écouteurs
     return () => {
       window.removeEventListener('cart-updated', updateCartBadge)
       window.removeEventListener('storage', updateCartBadge)
     }
   }, [])
+
+  // Statut admin recalculé à chaque connexion / déconnexion
+  useEffect(() => {
+    if (!user) {
+      setIsAdmin(false)
+      return
+    }
+    let cancelled = false
+    supabase
+      .from('profiles')
+      .select('is_admin')
+      .eq('id', user.id)
+      .maybeSingle()
+      .then(({ data: profile }) => {
+        if (!cancelled) setIsAdmin(!!profile?.is_admin || isAdminEmail(user.email))
+      })
+    return () => { cancelled = true }
+  }, [user])
 
   const navLinks = [
     { name: "Home", href: "/home", icon: Home },
@@ -164,6 +169,8 @@ export default function Header() {
               </AnimatePresence>
             </Link>
           </div>
+
+          <AuthButton tone={theme === 'dark' ? 'dark' : 'light'} />
 
           <motion.button
             onClick={toggleTheme}
