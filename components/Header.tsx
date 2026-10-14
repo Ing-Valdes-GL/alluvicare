@@ -11,6 +11,7 @@ import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "framer-
 import { useTheme } from "./ThemeProvider"
 import { EASE_OUT, SPRING_SNAPPY } from "./motion/tokens"
 import { supabase } from "@/lib/supabase"
+import { isAdminEmail } from '@/lib/admin'
 
 export default function Header() {
   const { theme, toggleTheme } = useTheme()
@@ -59,7 +60,7 @@ export default function Header() {
           .eq('id', session.user.id)
           .single()
         
-        const isEmailAdmin = session.user.email === 'doungmolagoungvaldes@gmail.com'
+        const isEmailAdmin = isAdminEmail(session.user.email)
         setIsAdmin(!!profile?.is_admin || isEmailAdmin)
       }
     }

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase, type Order } from '@/lib/supabase'
+import { isAdminEmail } from '@/lib/admin'
 import { useTheme } from '@/components/ThemeProvider'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
@@ -50,7 +51,7 @@ export default function AdminDashboard() {
         .eq('id', user.id)
         .single()
 
-      const isOwnerEmail = user.email === 'doungmolagoungvaldes@gmail.com'
+      const isOwnerEmail = isAdminEmail(user.email)
 
       if (profile?.is_admin || isOwnerEmail) {
         setUser(user)

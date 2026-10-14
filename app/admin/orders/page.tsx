@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { authHeaders } from '@/lib/auth-client'
+import { isAdminEmail } from '@/lib/admin'
 import { useTheme } from '@/components/ThemeProvider'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
@@ -30,7 +31,7 @@ export default function AdminDashboard() {
       if (!session) { setLoading(false); return; }
 
       const user = session.user
-      const isMasterAdmin = user.email === 'doungmolagoungvaldes@gmail.com'
+      const isMasterAdmin = isAdminEmail(user.email)
       const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', user.id).maybeSingle()
 
       const checkAdmin = isMasterAdmin || profile?.is_admin === true

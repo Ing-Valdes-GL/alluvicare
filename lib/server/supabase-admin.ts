@@ -1,5 +1,6 @@
 // SERVER ONLY — utilise la service role key (bypass RLS). Ne jamais importer depuis un composant client.
 import { createClient, type SupabaseClient, type User } from '@supabase/supabase-js'
+import { isAdminEmail } from '@/lib/admin'
 
 let client: SupabaseClient | null = null
 
@@ -12,8 +13,6 @@ export function getSupabaseAdmin(): SupabaseClient {
   return client
 }
 
-const MASTER_ADMIN_EMAIL = 'doungmolagoungvaldes@gmail.com'
-
 /** Résout l'utilisateur depuis `Authorization: Bearer <access_token>`. */
 export async function getRequestUser(req: Request): Promise<User | null> {
   const token = req.headers.get('authorization')?.match(/^Bearer\s+(.+)$/i)?.[1]
@@ -22,9 +21,9 @@ export async function getRequestUser(req: Request): Promise<User | null> {
   return error ? null : data.user
 }
 
-/** Même règle que le dashboard admin : master email OU profiles.is_admin. */
+/** Même règle que le dashboard admin : email admin (lib/admin.ts) OU profiles.is_admin. */
 export async function isAdmin(user: User): Promise<boolean> {
-  if (user.email?.toLowerCase() === MASTER_ADMIN_EMAIL) return true
+  if (isAdminEmail(user.email)) return true
   const { data } = await getSupabaseAdmin().from('profiles').select('is_admin').eq('id', user.id).maybeSingle()
   return data?.is_admin === true
 }
