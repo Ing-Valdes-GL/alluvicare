@@ -7,6 +7,14 @@ import { requestLoginEmail, verifyLoginCode, authHeaders } from '@/lib/auth-clie
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { User, CreditCard, Apple, Banknote, Bitcoin, X, Mail } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { SplitText } from '@/components/motion/SplitText'
+import { AnimatedNumber } from '@/components/motion/AnimatedNumber'
+import { EASE_OUT, SPRING_SNAPPY } from '@/components/motion/tokens'
+
+// Champs du formulaire : cascade à l'arrivée
+const formContainer = { hidden: {}, show: { transition: { staggerChildren: 0.06, delayChildren: 0.2 } } }
+const formRow = { hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { duration: 0.8, ease: EASE_OUT } } }
 
 export default function CheckoutPage() {
   const router = useRouter()
@@ -168,19 +176,19 @@ export default function CheckoutPage() {
       <Header />
       
       <div className="bg-[#FFEDD5] py-16 text-center">
-        <h1 className="text-4xl font-bold tracking-tight text-slate-900">Your Checkout</h1>
+        <h1 className="text-4xl font-bold tracking-tight text-slate-900"><SplitText text="Your Checkout" trigger="mount" /></h1>
       </div>
 
       <main className="container mx-auto px-6 py-12 grid lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-6">
-          <h2 className="text-xl font-bold mb-8 border-b pb-4">Billing Information</h2>
+        <motion.div className="lg:col-span-2 space-y-6" variants={formContainer} initial="hidden" animate="show">
+          <motion.h2 variants={formRow} className="text-xl font-bold mb-8 border-b pb-4">Billing Information</motion.h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <motion.div variants={formRow} className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <InputField label="First name *" error={errors.firstName} value={formData.firstName} onChange={(v:any) => setFormData({...formData, firstName: v})} />
             <InputField label="Last name *" error={errors.lastName} value={formData.lastName} onChange={(v:any) => setFormData({...formData, lastName: v})} />
-          </div>
+          </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <motion.div variants={formRow} className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <InputField label="Company (optional)" value={formData.companyName} onChange={(v:any) => setFormData({...formData, companyName: v})} />
             <div className="space-y-1">
               <label className="text-sm font-bold text-slate-800">Country *</label>
@@ -188,32 +196,38 @@ export default function CheckoutPage() {
                 <option>United Kingdom (UK)</option>
               </select>
             </div>
-          </div>
+          </motion.div>
 
-          <InputField label="Street address *" placeholder="House number and street name" error={errors.streetAddress} value={formData.streetAddress} onChange={(v:any) => setFormData({...formData, streetAddress: v})} />
-          <InputField label="Apartment, suite, etc. (optional)" value={formData.apartment} onChange={(v:any) => setFormData({...formData, apartment: v})} />
+          <motion.div variants={formRow}><InputField label="Street address *" placeholder="House number and street name" error={errors.streetAddress} value={formData.streetAddress} onChange={(v:any) => setFormData({...formData, streetAddress: v})} /></motion.div>
+          <motion.div variants={formRow}><InputField label="Apartment, suite, etc. (optional)" value={formData.apartment} onChange={(v:any) => setFormData({...formData, apartment: v})} /></motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <motion.div variants={formRow} className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <InputField label="Town / City *" error={errors.townCity} value={formData.townCity} onChange={(v:any) => setFormData({...formData, townCity: v})} />
             <InputField label="County/Region" value={formData.county} onChange={(v:any) => setFormData({...formData, county: v})} />
             <InputField label="Postcode *" error={errors.postcode} value={formData.postcode} onChange={(v:any) => setFormData({...formData, postcode: v})} />
-          </div>
+          </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <motion.div variants={formRow} className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <InputField label="Phone *" error={errors.phone} value={formData.phone} onChange={(v:any) => setFormData({...formData, phone: v})} />
             <InputField label="Email address *" error={errors.email} value={formData.email} onChange={(v:any) => setFormData({...formData, email: v})} />
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
         <aside>
-          <div className="bg-[#FFFBF7] p-8 rounded-3xl border border-orange-100 shadow-sm sticky top-24">
+          <motion.div
+            initial={{ opacity: 0, rotateY: 28, x: 60 }}
+            animate={{ opacity: 1, rotateY: 0, x: 0 }}
+            transition={{ duration: 1.1, ease: EASE_OUT, delay: 0.25 }}
+            style={{ transformPerspective: 1200 }}
+            className="bg-[#FFFBF7] p-8 rounded-3xl border border-orange-100 shadow-sm sticky top-24"
+          >
             <h3 className="text-lg font-bold mb-6">Review Your Order</h3>
             
             <div className="space-y-4 mb-8">
                {cartItems.map(item => (
                  <div key={item.id} className="flex justify-between items-start text-sm">
                    <div className="flex items-center gap-3">
-                     <img src={item.image_url} className="w-12 h-12 object-contain bg-white rounded-lg border border-slate-100" alt="" />
+                     <img src={item.image_url || item.main_image_url} className="w-12 h-12 object-contain bg-white rounded-lg border border-slate-100" alt="" />
                      <div>
                        <p className="text-slate-700 font-medium leading-tight">{item.name}</p>
                        <p className="font-bold text-slate-900 mt-1">× {item.quantity}</p>
@@ -225,11 +239,11 @@ export default function CheckoutPage() {
             </div>
 
             <div className="space-y-3 pt-4 border-t border-orange-100 text-sm">
-              <div className="flex justify-between"><span>Subtotal</span><span className="font-bold">£{subtotal.toFixed(2)}</span></div>
+              <div className="flex justify-between"><span>Subtotal</span><AnimatedNumber className="font-bold" value={subtotal} decimals={2} prefix="£" /></div>
               <div className="flex justify-between text-orange-600 font-medium italic"><span>Discount</span><span>-£{discount.toFixed(2)}</span></div>
               <div className="flex justify-between"><span>Shipping</span><span className="font-bold">£{shipping.toFixed(2)}</span></div>
               <div className="flex justify-between text-lg font-black pt-4 border-t border-orange-100">
-                <span>Total</span><span className="text-[#EF6C00] text-2xl">£{total.toFixed(2)}</span>
+                <span>Total</span><AnimatedNumber className="text-[#EF6C00] text-2xl" value={total} decimals={2} prefix="£" />
               </div>
             </div>
 
@@ -241,28 +255,51 @@ export default function CheckoutPage() {
               <PaymentOption id="crypto" label="Crypto" icon={<Bitcoin size={18} className="text-orange-500"/>} current={formData.paymentMethod} set={(v:any) => setFormData({...formData, paymentMethod: v})} />
             </div>
 
-            <button 
+            <motion.button 
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.96 }}
               onClick={handlePlaceOrder}
               disabled={isSubmitting}
-              className="w-full bg-[#FFA52F] text-white py-4 rounded-2xl font-bold mt-8 hover:bg-orange-600 transition-all shadow-lg active:scale-95 disabled:opacity-50"
+              className="group relative overflow-hidden w-full bg-[#FFA52F] text-white py-4 rounded-2xl font-bold mt-8 hover:bg-orange-600 transition-colors shadow-lg shadow-orange-200 disabled:opacity-50"
             >
-              {isSubmitting ? 'Processing...' : 'Place Order'}
-            </button>
-          </div>
+              <span className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/3 -skew-x-12 bg-white/30 blur-md transition-all duration-700 group-hover:left-[130%]" />
+              <span className="relative">{isSubmitting ? 'Processing...' : 'Place Order'}</span>
+            </motion.button>
+          </motion.div>
         </aside>
       </main>
       <Footer />
 
       {/* POPUP AUTH */}
+      <AnimatePresence>
       {showAuthModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-8 max-w-md w-full relative shadow-2xl">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          style={{ perspective: 1200 }}
+        >
+          <motion.div
+            role="dialog"
+            aria-modal="true"
+            initial={{ opacity: 0, rotateX: 35, y: 60, scale: 0.92 }}
+            animate={{ opacity: 1, rotateX: 0, y: 0, scale: 1 }}
+            exit={{ opacity: 0, rotateX: -15, y: 30, scale: 0.96 }}
+            transition={{ type: 'spring', stiffness: 260, damping: 24 }}
+            className="bg-white rounded-3xl p-8 max-w-md w-full relative shadow-2xl"
+          >
             <button onClick={() => setShowAuthModal(false)} className="absolute top-6 right-6 text-slate-400 hover:text-slate-900">
               <X size={20} />
             </button>
-            <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mb-6 text-[#FFA52F]">
+            <motion.div
+              initial={{ rotateY: -180, scale: 0.5 }}
+              animate={{ rotateY: 0, scale: 1 }}
+              transition={{ type: 'spring', stiffness: 260, damping: 14, delay: 0.1 }}
+              className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mb-6 text-[#FFA52F]"
+            >
               <Mail size={24} />
-            </div>
+            </motion.div>
             <h3 className="text-2xl font-black mb-2">Secure Your Order</h3>
             <p className="text-slate-500 text-sm mb-6">Verify your identity via email to complete your purchase.</p>
             <div className="space-y-4">
@@ -273,7 +310,10 @@ export default function CheckoutPage() {
                 </div>
               )}
               {authCodeSent && (
-                <input
+                <motion.input
+                  initial={{ opacity: 0, height: 0, rotateX: -60 }}
+                  animate={{ opacity: 1, height: 'auto', rotateX: 0 }}
+                  transition={{ duration: 0.5, ease: EASE_OUT }}
                   inputMode="numeric"
                   autoComplete="one-time-code"
                   maxLength={10}
@@ -298,9 +338,10 @@ export default function CheckoutPage() {
                 </button>
               )}
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
+      </AnimatePresence>
     </div>
   )
 }
@@ -323,8 +364,8 @@ function PaymentOption({ id, label, icon, current, set }: any) {
   const active = current === id;
   return (
     <label onClick={() => set(id)} className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${active ? 'border-orange-500 bg-orange-50' : 'border-slate-100 hover:border-slate-300'}`}>
-      <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${active ? 'border-orange-500' : 'border-slate-300'}`}>
-        {active && <div className="w-2 h-2 bg-orange-500 rounded-full" />}
+      <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${active ? 'border-orange-500' : 'border-slate-300'}`}>
+        {active && <motion.div layoutId="payment-dot" transition={SPRING_SNAPPY} className="w-2 h-2 bg-orange-500 rounded-full" />}
       </div>
       {icon}
       <span className="text-xs font-bold text-slate-700">{label}</span>

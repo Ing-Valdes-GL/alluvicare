@@ -7,6 +7,8 @@ import { useTheme } from '@/components/ThemeProvider'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { Send, Paperclip, Check, CheckCheck, MessageSquare, Shield, Info } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { EASE_OUT } from '@/components/motion/tokens'
 
 function ChatContent() {
   const { theme } = useTheme()
@@ -204,11 +206,18 @@ function ChatContent() {
       <Header />
 
       <main className="flex-1 container mx-auto max-w-5xl px-4 py-8 flex flex-col min-h-0">
-        <div className="flex items-center justify-between mb-6 px-2">
+        <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: EASE_OUT }} className="flex items-center justify-between mb-6 px-2">
             <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-[#FFA52F] rounded-2xl flex items-center justify-center text-white shadow-lg shadow-orange-500/20">
+                <motion.div
+                  initial={{ rotateY: -180, scale: 0.5 }}
+                  animate={{ rotateY: 0, scale: 1 }}
+                  transition={{ type: 'spring', stiffness: 220, damping: 14, delay: 0.1 }}
+                  whileHover={{ rotateY: 180 }}
+                  style={{ transformPerspective: 400 }}
+                  className="w-12 h-12 bg-[#FFA52F] rounded-2xl flex items-center justify-center text-white shadow-lg shadow-orange-500/20"
+                >
                     <MessageSquare size={24} />
-                </div>
+                </motion.div>
                 <div>
                     <h1 className="text-2xl font-black tracking-tighter uppercase leading-none">Secure <span className="text-[#FFA52F] italic">Channel</span></h1>
                     <div className="flex items-center gap-2 mt-1">
@@ -221,25 +230,43 @@ function ChatContent() {
                 <Shield size={14} className="text-[#FFA52F]" />
                 <span className="text-[9px] font-black uppercase tracking-tighter text-[#FFA52F]">End-to-End Encrypted</span>
             </div>
-        </div>
+        </motion.div>
 
-        <div className={`flex-1 overflow-hidden flex flex-col rounded-[2.5rem] border ${theme === 'dark' ? 'bg-gray-900/40 border-white/5' : 'bg-white border-gray-200 shadow-xl'}`}>
+        <motion.div
+          initial={{ opacity: 0, rotateX: 18, y: 50, scale: 0.97 }}
+          animate={{ opacity: 1, rotateX: 0, y: 0, scale: 1 }}
+          transition={{ duration: 1.1, ease: EASE_OUT, delay: 0.1 }}
+          style={{ transformPerspective: 1400, transformOrigin: '50% 100%' }}
+          className={`flex-1 overflow-hidden flex flex-col rounded-[2.5rem] border ${theme === 'dark' ? 'bg-gray-900/40 border-white/5' : 'bg-white border-gray-200 shadow-xl'}`}
+        >
           <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-8 scrollbar-hide">
             {loading ? (
                 <div className="h-full flex items-center justify-center">
                     <div className="w-10 h-10 border-4 border-[#FFA52F] border-t-transparent rounded-full animate-spin"></div>
                 </div>
             ) : messages.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-center opacity-30">
-                    <Info size={48} className="mb-4" />
+                <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 0.3, scale: 1 }} className="h-full flex flex-col items-center justify-center text-center">
+                    <motion.div animate={{ y: [0, -8, 0] }} transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}>
+                      <Info size={48} className="mb-4" />
+                    </motion.div>
                     <p className="font-black uppercase tracking-[0.2em] text-sm">System Ready</p>
                     <p className="text-xs max-w-[200px] mt-2">Transmit your order reference or inquiries below.</p>
-                </div>
+                </motion.div>
             ) : (
-              messages.map((msg) => {
+              <AnimatePresence initial={false}>
+              {messages.map((msg) => {
                 const isOwn = msg.sender_id === user?.id
                 return (
-                  <div key={msg.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-4 duration-500`}>
+                  // Bulle qui "jaillit" depuis son côté, avec un léger rebond
+                  <motion.div
+                    key={msg.id}
+                    layout="position"
+                    initial={{ opacity: 0, y: 24, scale: 0.85, rotateY: isOwn ? -25 : 25 }}
+                    animate={{ opacity: 1, y: 0, scale: 1, rotateY: 0 }}
+                    transition={{ type: 'spring', stiffness: 320, damping: 24 }}
+                    style={{ transformOrigin: isOwn ? '100% 100%' : '0% 100%', transformPerspective: 800 }}
+                    className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
+                  >
                     <div className={`max-w-[85%] md:max-w-[70%] ${isOwn ? 'items-end' : 'items-start'} flex flex-col`}>
                       <div className={`px-6 py-4 rounded-[1.8rem] text-sm font-medium shadow-sm ${
                         isOwn 
@@ -267,9 +294,10 @@ function ChatContent() {
                         )}
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 )
-              })
+              })}
+              </AnimatePresence>
             )}
             <div ref={messagesEndRef} />
           </div>
@@ -295,19 +323,21 @@ function ChatContent() {
                 className="flex-1 bg-transparent border-none focus:ring-0 text-sm font-bold uppercase tracking-wider placeholder:opacity-30"
               />
 
-              <button
+              <motion.button
                 onClick={sendMessage}
                 disabled={!newMessage.trim() || sending}
-                className="w-12 h-12 bg-[#FFA52F] text-white flex items-center justify-center rounded-full hover:scale-105 active:scale-95 transition-all disabled:opacity-20 shadow-lg shadow-orange-500/30"
+                whileHover={{ scale: 1.08, rotate: -12 }}
+                whileTap={{ scale: 0.88, x: 4, rotate: -30 }}
+                className="w-12 h-12 bg-[#FFA52F] text-white flex items-center justify-center rounded-full transition-opacity disabled:opacity-20 shadow-lg shadow-orange-500/30"
               >
                 <Send size={18} />
-              </button>
+              </motion.button>
             </div>
             <p className="text-center text-[9px] font-black uppercase tracking-[0.2em] opacity-20 mt-4">
                 Transmission encrypted via ALLUVI Healthcare v3.4
             </p>
           </div>
-        </div>
+        </motion.div>
       </main>
 
       <Footer />

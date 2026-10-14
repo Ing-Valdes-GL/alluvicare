@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Activity, Mail, Phone, MapPin, ShieldCheck, ArrowRight, MessageCircle, Send } from 'lucide-react'
 import { useTheme } from '@/components/ThemeProvider'
+import { Reveal, Stagger, StaggerItem } from '@/components/motion/Reveal'
 
 export default function Footer() {
   const { theme } = useTheme()
@@ -27,10 +28,10 @@ export default function Footer() {
   return (
     <footer className={`border-t-4 border-orange-500 ${theme === 'dark' ? 'bg-black text-white' : 'bg-white text-gray-900'}`}>
       <div className="container mx-auto px-4 py-20 max-w-7xl">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-16">
+        <Stagger className="grid grid-cols-1 md:grid-cols-12 gap-16" stagger={0.12}>
           
           {/* Brand & Newsletter Column */}
-          <div className="col-span-1 md:col-span-5 space-y-8">
+          <StaggerItem className="col-span-1 md:col-span-5 space-y-8">
             <Link href="/" className="flex items-center gap-2 group">
               <Activity className="w-10 h-10 text-orange-500 transition-transform group-hover:rotate-12" />
               <span className="text-4xl font-black tracking-tighter uppercase">
@@ -70,10 +71,10 @@ export default function Footer() {
               <ShieldCheck size={18} />
               <span>Certified Medical Supplier</span>
             </div>
-          </div>
+          </StaggerItem>
 
           {/* Quick Links */}
-          <div className="col-span-1 md:col-span-3">
+          <StaggerItem className="col-span-1 md:col-span-3">
             <h3 className="font-black text-sm uppercase tracking-[0.4em] mb-10 text-orange-500">Explore</h3>
             <ul className="space-y-6">
               {[
@@ -89,10 +90,10 @@ export default function Footer() {
                 </li>
               ))}
             </ul>
-          </div>
+          </StaggerItem>
 
           {/* Contact Section */}
-          <div className="col-span-1 md:col-span-4">
+          <StaggerItem className="col-span-1 md:col-span-4">
             <h3 className="font-black text-sm uppercase tracking-[0.4em] mb-10 text-orange-500">Contact Us</h3>
             <ul className="space-y-6">
               <li className="flex items-center gap-5 group">
@@ -143,24 +144,24 @@ export default function Footer() {
                 </div>
               </li>
             </ul>
-          </div>
-        </div>
+          </StaggerItem>
+        </Stagger>
 
         {/* --- SECTION DES LOGOS DE PAIEMENT EN COULEUR --- */}
-        <div className="mt-20 flex flex-col items-center gap-6">
+        <Reveal className="mt-20 flex flex-col items-center gap-6">
            <div className="flex flex-wrap justify-center items-center gap-6">
-              <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard" className="h-6 w-auto" />
-              <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="PayPal" className="h-6 w-auto" />
-              <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo_2014.svg" alt="Visa" className="h-4 w-auto" />
-              <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/American_Express_logo_%282018%29.svg" alt="Amex" className="h-6 w-auto" />
-              <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/Maestro_logo.svg" alt="Maestro" className="h-6 w-auto" />
-              <img src="https://upload.wikimedia.org/wikipedia/commons/a/a6/Diners_Club_Logo3.svg" alt="Diners Club" className="h-6 w-auto" />
-              <img src="https://upload.wikimedia.org/wikipedia/commons/4/40/JCB_logo.svg" alt="JCB" className="h-6 w-auto" />
+              <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard" className="h-6 w-auto transition-transform duration-300 hover:-translate-y-1 hover:scale-110" />
+              <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="PayPal" className="h-6 w-auto transition-transform duration-300 hover:-translate-y-1 hover:scale-110" />
+              <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo_2014.svg" alt="Visa" className="h-4 w-auto transition-transform duration-300 hover:-translate-y-1 hover:scale-110" />
+              <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/American_Express_logo_%282018%29.svg" alt="Amex" className="h-6 w-auto transition-transform duration-300 hover:-translate-y-1 hover:scale-110" />
+              <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/Maestro_logo.svg" alt="Maestro" className="h-6 w-auto transition-transform duration-300 hover:-translate-y-1 hover:scale-110" />
+              <img src="https://upload.wikimedia.org/wikipedia/commons/a/a6/Diners_Club_Logo3.svg" alt="Diners Club" className="h-6 w-auto transition-transform duration-300 hover:-translate-y-1 hover:scale-110" />
+              <img src="https://upload.wikimedia.org/wikipedia/commons/4/40/JCB_logo.svg" alt="JCB" className="h-6 w-auto transition-transform duration-300 hover:-translate-y-1 hover:scale-110" />
            </div>
            <p className={`text-[11px] font-bold uppercase tracking-[0.2em] opacity-50 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
               Advancing discovery through Alluvi research
            </p>
-        </div>
+        </Reveal>
 
         {/* Bottom Bar */}
         <div className={`mt-10 pt-10 border-t ${theme === 'dark' ? 'border-white/5' : 'border-gray-100'} flex flex-col md:flex-row justify-between items-center gap-8`}>

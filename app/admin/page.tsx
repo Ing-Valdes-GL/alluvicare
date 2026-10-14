@@ -11,6 +11,7 @@ import {
   Users, Package, MessageCircle, Clock, Check, 
   DollarSign, ShoppingBag, X, ArrowRight, ShieldAlert 
 } from 'lucide-react'
+import { Stagger, StaggerItem } from '@/components/motion/Reveal'
 
 export default function AdminDashboard() {
   const { theme } = useTheme()
@@ -163,14 +164,14 @@ export default function AdminDashboard() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+        <Stagger className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10" stagger={0.08}>
           {[
             { label: 'Total Users', value: stats.totalUsers, icon: Users },
             { label: 'Live Products', value: stats.totalProducts, icon: Package },
             { label: 'Pending Orders', value: stats.pendingOrders, icon: Clock },
             { label: 'Total Revenue', value: `${stats.totalRevenue.toLocaleString()} £`, icon: DollarSign },
           ].map((stat, i) => (
-            <div key={i} className={`${theme === 'dark' ? 'bg-gray-900/40 border-white/5' : 'bg-white border-gray-100'} p-8 rounded-[2rem] border backdrop-blur-sm shadow-xl`}>
+            <StaggerItem key={i} variant="tilt" className={`${theme === 'dark' ? 'bg-gray-900/40 border-white/5' : 'bg-white border-gray-100'} p-8 rounded-[2rem] border shadow-xl`}>
               <div className="flex items-center justify-between mb-6">
                 <div className="p-3 rounded-2xl bg-brand-primary/10 text-brand-primary border border-brand-primary/20">
                   <stat.icon size={20} />
@@ -179,18 +180,19 @@ export default function AdminDashboard() {
               </div> 
               <p className="text-xs font-black uppercase tracking-widest opacity-40 mb-1">{stat.label}</p>
               <p className="text-3xl font-black tracking-tighter">{stat.value}</p>
-            </div>
+            </StaggerItem>
           ))}
-        </div>
+        </Stagger>
 
         {/* Action Grid */}
-        <div className="grid md:grid-cols-3 gap-6 mb-12">
+        <Stagger className="grid md:grid-cols-3 gap-6 mb-12" stagger={0.1}>
           {[
             { title: 'Inventory', desc: 'Modify medical supply records', href: '/admin/products', icon: Package },
             { title: 'Logistics', desc: 'Track & confirm shipments', href: '/admin/orders', icon: ShoppingBag },
             { title: 'Intelligence', desc: 'Direct secure messaging', href: '/admin/chat', icon: MessageCircle, badge: stats.unreadMessages },
           ].map((action, i) => (
-            <Link key={i} href={action.href} className={`group p-8 rounded-[2.5rem] border transition-all relative overflow-hidden ${
+            <StaggerItem key={i} variant="tilt">
+            <Link href={action.href} className={`group block h-full p-8 rounded-[2.5rem] border transition-all duration-500 hover:-translate-y-1.5 hover:shadow-2xl relative overflow-hidden ${
               theme === 'dark' ? 'bg-gray-900/40 border-white/5 hover:border-brand-primary/40' : 'bg-white border-gray-100 hover:border-brand-primary'
             }`}>
               <div className="relative z-10">
@@ -209,8 +211,9 @@ export default function AdminDashboard() {
                 </div>
               ) : null}
             </Link>
+            </StaggerItem>
           ))}
-        </div>
+        </Stagger>
 
         {/* Recent Activity Table */}
         <div className={`${theme === 'dark' ? 'bg-gray-900/40 border-white/5' : 'bg-white border-gray-100'} rounded-[2.5rem] border shadow-2xl overflow-hidden`}>

@@ -6,7 +6,10 @@ import { supabase } from '@/lib/supabase'
 import { useTheme } from '@/components/ThemeProvider'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
-import { Package, Clock, CheckCircle, XCircle, ChevronDown, ChevronUp, Hash } from 'lucide-react'
+import { Package, ChevronDown, Hash } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { SplitText } from '@/components/motion/SplitText'
+import { EASE_OUT } from '@/components/motion/tokens'
 
 export default function OrdersPage() {
   const { theme } = useTheme() // Still keeping the hook for system compatibility
@@ -59,8 +62,10 @@ export default function OrdersPage() {
 
       <main className="container mx-auto px-6 py-16 max-w-5xl">
         <header className="mb-12">
-          <h1 className="text-4xl font-bold tracking-tight text-white mb-2">Order History</h1>
-          <p className="text-zinc-500 text-sm">Review and track your pharmaceutical transmissions.</p>
+          <h1 className="text-4xl font-bold tracking-tight text-white mb-2"><SplitText text="Order History" trigger="mount" /></h1>
+          <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: EASE_OUT, delay: 0.3 }} className="text-zinc-500 text-sm">
+            Review and track your pharmaceutical transmissions.
+          </motion.p>
         </header>
 
         {loading ? (
@@ -69,16 +74,22 @@ export default function OrdersPage() {
             <p className="text-zinc-500 text-xs font-medium uppercase tracking-widest">Loading Records...</p>
           </div>
         ) : orders.length === 0 ? (
-          <div className="bg-zinc-900/50 border border-zinc-800 p-20 text-center rounded-2xl">
-            <Package className="mx-auto mb-4 text-zinc-700" size={48} />
+          <motion.div initial={{ opacity: 0, rotateX: 20, y: 40 }} animate={{ opacity: 1, rotateX: 0, y: 0 }} transition={{ duration: 1, ease: EASE_OUT }} style={{ transformPerspective: 1000 }} className="bg-zinc-900/50 border border-zinc-800 p-20 text-center rounded-2xl">
+            <motion.div animate={{ rotateY: 360 }} transition={{ duration: 8, repeat: Infinity, ease: 'linear' }} style={{ transformPerspective: 400 }} className="w-fit mx-auto">
+              <Package className="mx-auto mb-4 text-zinc-700" size={48} />
+            </motion.div>
             <p className="text-zinc-500 font-medium">No order history found.</p>
-          </div>
+          </motion.div>
         ) : (
-          <div className="space-y-6">
-            {orders.map((order) => (
-              <div 
+          <div className="space-y-6" style={{ perspective: 1400 }}>
+            {orders.map((order, index) => (
+              <motion.div 
                 key={order.id} 
-                className={`group border transition-all duration-300 overflow-hidden rounded-2xl ${
+                layout
+                initial={{ opacity: 0, y: 40, rotateX: -25 }}
+                animate={{ opacity: 1, y: 0, rotateX: 0 }}
+                transition={{ duration: 0.9, ease: EASE_OUT, delay: Math.min(index, 8) * 0.07 }}
+                className={`group border transition-[border-color,background-color,box-shadow] duration-300 overflow-hidden rounded-2xl ${
                   expandedOrderId === order.id 
                   ? 'border-zinc-700 bg-zinc-900 shadow-2xl' 
                   : 'border-zinc-800 bg-zinc-900/40 hover:border-zinc-700'
@@ -119,16 +130,29 @@ export default function OrdersPage() {
                     </div>
                     <div className="flex items-center gap-4">
                       {getStatusBadge(order.status)}
-                      <div className={`p-1 rounded-full transition-transform duration-300 ${expandedOrderId === order.id ? 'rotate-180 bg-zinc-800 text-white' : 'text-zinc-600'}`}>
+                      <motion.div
+                        animate={{ rotateX: expandedOrderId === order.id ? 180 : 0 }}
+                        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                        className={`p-1 rounded-full transition-colors duration-300 ${expandedOrderId === order.id ? 'bg-zinc-800 text-white' : 'text-zinc-600'}`}
+                      >
                         <ChevronDown size={20} />
-                      </div>
+                      </motion.div>
                     </div>
                   </div>
                 </div>
 
                 {/* Detailed Table Section */}
+                <AnimatePresence initial={false}>
                 {expandedOrderId === order.id && (
-                  <div className="bg-black/20 border-t border-zinc-800 p-8 animate-in fade-in duration-300">
+                  <motion.div
+                    key="details"
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.5, ease: EASE_OUT }}
+                    className="overflow-hidden"
+                  >
+                  <div className="bg-black/20 border-t border-zinc-800 p-8">
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="text-[10px] uppercase text-zinc-500 border-b border-zinc-800">
@@ -139,8 +163,14 @@ export default function OrdersPage() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-zinc-800/50">
-                        {order.order_items?.map((item: any) => (
-                          <tr key={item.id} className="text-zinc-300 hover:bg-white/[0.02] transition-colors">
+                        {order.order_items?.map((item: any, i: number) => (
+                          <motion.tr
+                            key={item.id}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.5, ease: EASE_OUT, delay: 0.1 + i * 0.05 }}
+                            className="text-zinc-300 hover:bg-white/[0.02] transition-colors"
+                          >
                             <td className="py-5 font-medium text-zinc-100">{item.product_name}</td>
                             <td className="py-5 text-center font-bold">
                                 <span className="text-zinc-600 text-[10px] mr-1 italic">x</span>
@@ -150,13 +180,15 @@ export default function OrdersPage() {
                             <td className="py-5 text-right font-bold text-white font-mono">
                               £{(Number(item.quantity) * Number(item.unit_price)).toFixed(2)}
                             </td>
-                          </tr>
+                          </motion.tr>
                         ))}
                       </tbody>
                     </table>
                   </div>
+                  </motion.div>
                 )}
-              </div>
+                </AnimatePresence>
+              </motion.div>
             ))}
           </div>
         )}

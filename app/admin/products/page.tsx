@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { Plus, Edit3, Trash2, Eye, EyeOff, Upload, X, ImageIcon, Loader2, ChevronDown } from 'lucide-react'
+import { Stagger, StaggerItem } from '@/components/motion/Reveal'
 
 export default function AdminDashboard() {
   const router = useRouter()
@@ -151,9 +152,9 @@ export default function AdminDashboard() {
           <div className="flex justify-center py-20"><Loader2 className="animate-spin text-[#EF6C00]" size={40} /></div>
         ) : (
           // MODIFICATION : Grille passée à 4 colonnes (md:grid-cols-4) pour réduire la taille des conteneurs
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+          <Stagger className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6" stagger={0.06}>
             {products.map((product) => (
-              <div key={product.id} className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100 group flex flex-col">
+              <StaggerItem key={product.id} variant="tilt" className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100 group flex flex-col transition-shadow duration-500 hover:shadow-2xl">
                 {/* MODIFICATION : aspect-square et padding p-6 pour une image plus petite */}
                 <div className="aspect-square bg-[#F7F7F7] relative flex items-center justify-center p-6">
                   {/* CORRECTION : Utilisation de product.main_image_url */}
@@ -203,9 +204,9 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </StaggerItem>
             ))}
-          </div>
+          </Stagger>
         )}
       </main>
 

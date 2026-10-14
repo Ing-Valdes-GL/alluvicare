@@ -5,7 +5,33 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
-import { Trash2, Plus, Minus, ArrowRight, X } from 'lucide-react'
+import { Trash2, Plus, Minus, ArrowRight, ShoppingBag } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { SplitText } from '@/components/motion/SplitText'
+import { Reveal } from '@/components/motion/Reveal'
+import { AnimatedNumber } from '@/components/motion/AnimatedNumber'
+import { Magnetic } from '@/components/motion/Magnetic'
+import { EASE_OUT } from '@/components/motion/tokens'
+
+/** Chiffre qui bascule en 3D quand il change (quantités). */
+function FlipDigit({ value }: { value: number }) {
+  return (
+    <span className="relative inline-flex h-5 w-6 items-center justify-center overflow-hidden" style={{ perspective: 200 }}>
+      <AnimatePresence mode="popLayout" initial={false}>
+        <motion.span
+          key={value}
+          initial={{ rotateX: -90, y: -10, opacity: 0 }}
+          animate={{ rotateX: 0, y: 0, opacity: 1 }}
+          exit={{ rotateX: 90, y: 10, opacity: 0 }}
+          transition={{ type: 'spring', stiffness: 420, damping: 26 }}
+          className="text-sm font-semibold text-slate-700 tabular-nums"
+        >
+          {value}
+        </motion.span>
+      </AnimatePresence>
+    </span>
+  )
+}
 
 export default function CartPage() {
   const router = useRouter()
@@ -77,8 +103,17 @@ export default function CartPage() {
 
       {/* Hero Header - Design épuré */}
       <div className="bg-[#FFFBF7] py-16 text-center border-b border-orange-50/50">
-        <h1 className="text-4xl font-bold tracking-tight text-slate-900">Your Cart</h1>
-        <p className="text-slate-500 text-sm mt-2 font-medium">Review your items before secure checkout</p>
+        <h1 className="text-4xl font-bold tracking-tight text-slate-900">
+          <SplitText text="Your Cart" trigger="mount" />
+        </h1>
+        <motion.p
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: EASE_OUT, delay: 0.3 }}
+          className="text-slate-500 text-sm mt-2 font-medium"
+        >
+          Review your items before secure checkout
+        </motion.p>
       </div>
 
       <main className="container mx-auto px-6 py-12">
@@ -99,10 +134,19 @@ export default function CartPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
-                  {cartItems.map((item) => (
-                    <tr key={item.id} className="group">
+                  <AnimatePresence initial={false}>
+                  {cartItems.map((item, index) => (
+                    <motion.tr
+                      key={item.id}
+                      layout
+                      initial={{ opacity: 0, y: 24, rotateX: -20 }}
+                      animate={{ opacity: 1, y: 0, rotateX: 0, transition: { duration: 0.7, ease: EASE_OUT, delay: loading ? 0 : index * 0.06 } }}
+                      exit={{ opacity: 0, x: -60, transition: { duration: 0.35 } }}
+                      style={{ transformPerspective: 800 }}
+                      className="group"
+                    >
                       <td className="py-6 flex items-center gap-4">
-                        <div className="w-16 h-16 bg-slate-50 rounded-lg p-1 flex items-center justify-center border border-slate-100">
+                        <div className="w-16 h-16 bg-slate-50 rounded-lg p-1 flex items-center justify-center border border-slate-100 transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6">
                           <img 
                             src={item.image_url || item.main_image_url} 
                             className="max-h-full max-w-full object-contain" 
@@ -117,7 +161,7 @@ export default function CartPage() {
                           <button onClick={() => updateQuantity(item.id, -1)} className="text-slate-400 hover:text-orange-500 transition-colors">
                             <Minus size={14}/>
                           </button>
-                          <span className="text-sm font-semibold text-slate-700">{item.quantity}</span>
+                          <FlipDigit value={item.quantity} />
                           <button onClick={() => updateQuantity(item.id, 1)} className="text-slate-400 hover:text-orange-500 transition-colors">
                             <Plus size={14}/>
                           </button>
@@ -125,23 +169,34 @@ export default function CartPage() {
                       </td>
                       <td className="py-6 font-bold text-sm text-slate-900">£{(item.price * item.quantity).toFixed(2)}</td>
                       <td className="py-6 text-right">
-                        <button onClick={() => removeItem(item.id)} className="text-slate-300 hover:text-red-400 transition-colors">
+                        <motion.button whileHover={{ rotate: -12, scale: 1.15 }} whileTap={{ scale: 0.85 }} onClick={() => removeItem(item.id)} className="text-slate-300 hover:text-red-400 transition-colors" aria-label={`Remove ${item.name}`}>
                           <Trash2 size={16} />
-                        </button>
+                        </motion.button>
                       </td>
-                    </tr>
+                    </motion.tr>
                   ))}
+                  </AnimatePresence>
                 </tbody>
               </table>
-              {cartItems.length === 0 && (
-                <div className="py-12 text-center text-slate-400 text-sm italic">
-                  Your cart is currently empty.
-                </div>
-              )}
+              <AnimatePresence>
+                {!loading && cartItems.length === 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="py-12 flex flex-col items-center gap-4 text-slate-400 text-sm italic"
+                  >
+                    <motion.div animate={{ y: [0, -8, 0], rotateY: [0, 180, 360] }} transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }} style={{ transformPerspective: 400 }}>
+                      <ShoppingBag size={40} className="text-slate-200" />
+                    </motion.div>
+                    Your cart is currently empty.
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             {/* SECTION SHIPPING INFORMATION */}
-            <div className="pt-8 border-t border-slate-100">
+            <Reveal className="pt-8 border-t border-slate-100">
               <h3 className="text-lg font-bold mb-6 text-slate-900">Shipping Information</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
@@ -179,18 +234,24 @@ export default function CartPage() {
                   </button>
                 </div>
               </div>
-            </div>
+            </Reveal>
           </div>
 
           {/* COLONNE DROITE : RÉSUMÉ (VIOLET) */}
           <div className="lg:col-span-1">
-            <div className="bg-[#3D002E] rounded-3xl p-8 text-white sticky top-28 shadow-xl border border-white/5">
-              <h2 className="text-lg font-bold mb-8 opacity-90">{cartItems.length} Items In Cart</h2>
+            <motion.div
+              initial={{ opacity: 0, rotateY: 30, x: 60 }}
+              animate={{ opacity: 1, rotateY: 0, x: 0 }}
+              transition={{ duration: 1.1, ease: EASE_OUT, delay: 0.2 }}
+              style={{ transformPerspective: 1200 }}
+              className="bg-[#3D002E] rounded-3xl p-8 text-white sticky top-28 shadow-xl border border-white/5"
+            >
+              <h2 className="text-lg font-bold mb-8 opacity-90"><AnimatedNumber value={cartItems.length} /> Items In Cart</h2>
               
               <div className="space-y-6">
                 <div className="flex justify-between items-center border-b border-white/10 pb-4">
                   <span className="text-xs font-medium opacity-60 uppercase tracking-wider">Subtotal</span>
-                  <span className="font-semibold text-base">£{subtotal.toFixed(2)}</span>
+                  <AnimatedNumber className="font-semibold text-base" value={subtotal} decimals={2} prefix="£" />
                 </div>
                 
                 <div className="space-y-3">
@@ -207,18 +268,21 @@ export default function CartPage() {
                 <div className="pt-4">
                   <div className="flex justify-between items-end">
                     <span className="font-bold text-sm uppercase opacity-60">Total</span>
-                    <span className="text-3xl font-bold tracking-tight">£{total.toFixed(2)}</span>
+                    <AnimatedNumber className="text-3xl font-bold tracking-tight" value={total} decimals={2} prefix="£" />
                   </div>
                 </div>
 
                 <div className="pt-6 space-y-3">
-                  <button 
-                    onClick={handleProceedToCheckout}
-                    className="w-full bg-[#EF6C00] text-white py-4 rounded-xl font-bold text-xs uppercase tracking-[0.15em] shadow-lg hover:bg-orange-600 transition-all flex items-center justify-center gap-2 group active:scale-[0.98]"
-                  >
-                    Proceed To Checkout 
-                    <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
-                  </button>
+                  <Magnetic strength={0.12} className="w-full">
+                    <button 
+                      onClick={handleProceedToCheckout}
+                      className="relative overflow-hidden w-full bg-[#EF6C00] text-white py-4 rounded-xl font-bold text-xs uppercase tracking-[0.15em] shadow-lg hover:bg-orange-600 transition-colors flex items-center justify-center gap-2 group active:scale-[0.98]"
+                    >
+                      <span className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/3 -skew-x-12 bg-white/30 blur-md transition-all duration-700 group-hover:left-[130%]" />
+                      Proceed To Checkout 
+                      <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                    </button>
+                  </Magnetic>
                   
                   <button 
                     onClick={() => saveCart([...cartItems])}
@@ -228,7 +292,7 @@ export default function CartPage() {
                   </button>
                 </div>
               </div>
-            </div>
+            </motion.div>
           </div>
 
         </div>

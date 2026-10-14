@@ -5,6 +5,11 @@ import { useSearchParams, useRouter } from 'next/navigation' // Ajout de useRout
 import { supabase } from '@/lib/supabase'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
+import { motion } from 'framer-motion'
+import { Check } from 'lucide-react'
+import { SplitText } from '@/components/motion/SplitText'
+import { Reveal, Stagger, StaggerItem } from '@/components/motion/Reveal'
+import { Magnetic } from '@/components/motion/Magnetic'
 
 function CheckoutDetails() {
   const searchParams = useSearchParams()
@@ -66,12 +71,30 @@ function CheckoutDetails() {
       <Header />
       
       <main className="container mx-auto px-6 py-12 max-w-4xl">
+        {/* Sceau de confirmation : bascule 3D + onde */}
+        <div className="relative mb-8 h-20 w-20" style={{ perspective: 600 }}>
+          <motion.div
+            className="absolute inset-0 rounded-full bg-orange-500/30"
+            initial={{ scale: 0.6, opacity: 0.8 }}
+            animate={{ scale: 2.2, opacity: 0 }}
+            transition={{ duration: 1.6, repeat: Infinity, ease: 'easeOut', delay: 0.6 }}
+          />
+          <motion.div
+            initial={{ rotateY: -180, scale: 0.3 }}
+            animate={{ rotateY: 0, scale: 1 }}
+            transition={{ type: 'spring', stiffness: 200, damping: 14 }}
+            className="relative flex h-20 w-20 items-center justify-center rounded-full bg-orange-500 text-white shadow-xl shadow-orange-500/30"
+          >
+            <Check size={38} strokeWidth={3} />
+          </motion.div>
+        </div>
         <h1 className="text-5xl font-black text-slate-800 mb-8 tracking-tight">
-          Thank You. Your Order Has Been Received.
+          <SplitText text="Thank You. Your Order Has Been Received." trigger="mount" delay={0.2} stagger={0.05} />
         </h1>
 
         {/* --- BOUTON CONTACT SUPPORT --- */}
-        <div className="mb-10">
+        <Reveal delay={0.5} className="mb-10">
+          <Magnetic strength={0.15}>
           <button 
             onClick={handleSupportClick}
             disabled={isSending}
@@ -82,31 +105,32 @@ function CheckoutDetails() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
             </svg>
           </button>
-        </div>
+          </Magnetic>
+        </Reveal>
 
-        <div className="flex flex-wrap gap-8 mb-12 text-sm border-b border-slate-100 pb-8">
-          <div>
+        <Stagger className="flex flex-wrap gap-8 mb-12 text-sm border-b border-slate-100 pb-8" stagger={0.08} delay={0.4}>
+          <StaggerItem>
             <p className="text-slate-400 uppercase font-bold text-[10px] tracking-widest mb-1">Order number:</p>
             <p className="font-black text-slate-900">{order.reference_code || order.id.slice(0,5)}</p>
-          </div>
-          <div>
+          </StaggerItem>
+          <StaggerItem>
             <p className="text-slate-400 uppercase font-bold text-[10px] tracking-widest mb-1">Date:</p>
             <p className="font-black text-slate-900">
               {new Date(order.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
             </p>
-          </div>
-          <div>
+          </StaggerItem>
+          <StaggerItem>
             <p className="text-slate-400 uppercase font-bold text-[10px] tracking-widest mb-1">Total:</p>
             <p className="font-black text-slate-900">£{Number(order.total_amount).toFixed(2)}</p>
-          </div>
-          <div>
+          </StaggerItem>
+          <StaggerItem>
             <p className="text-slate-400 uppercase font-bold text-[10px] tracking-widest mb-1">Payment method:</p>
             <p className="font-black text-slate-900 capitalize">{order.payment_method?.replace('_', ' ')}</p>
-          </div>
-        </div>
+          </StaggerItem>
+        </Stagger>
 
         {/* ... Le reste du tableau reste identique ... */}
-        <div className="border border-slate-100 rounded-sm p-8 shadow-sm">
+        <Reveal variant="tilt" className="border border-slate-100 rounded-sm p-8 shadow-sm">
           <h2 className="text-4xl font-black text-slate-900 mb-8">Order Details</h2>
           
           <table className="w-full text-left">
@@ -118,7 +142,14 @@ function CheckoutDetails() {
             </thead>
             <tbody className="text-slate-700">
               {items.map((item, idx) => (
-                <tr key={idx} className="border-b border-slate-50">
+                <motion.tr
+                  key={idx}
+                  initial={{ opacity: 0, x: -30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.7, delay: idx * 0.07, ease: [0.16, 1, 0.3, 1] }}
+                  className="border-b border-slate-50"
+                >
                   <td className="py-6 flex items-center gap-4">
                     <span className="font-bold text-orange-500 hover:underline cursor-pointer">
                       {item.product_name}
@@ -128,7 +159,7 @@ function CheckoutDetails() {
                   <td className="py-6 text-right font-medium">
                     £{(item.unit_price * item.quantity).toFixed(2)}
                   </td>
-                </tr>
+                </motion.tr>
               ))}
             </tbody>
             <tfoot className="text-sm">
@@ -152,7 +183,7 @@ function CheckoutDetails() {
               </tr>
             </tfoot>
           </table>
-        </div>
+        </Reveal>
       </main>
 
       <Footer />

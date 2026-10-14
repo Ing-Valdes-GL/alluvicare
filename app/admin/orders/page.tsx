@@ -11,6 +11,8 @@ import {
   Users, ShoppingBag, DollarSign, Clock, Package, 
   Search, CheckCircle, XCircle, RefreshCcw, Hash, Mail, User
 } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { Reveal } from '@/components/motion/Reveal'
 
 export default function AdminDashboard() {
   const { theme } = useTheme()
@@ -136,12 +138,12 @@ export default function AdminDashboard() {
         </div>
         
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-16">
+        <Reveal variant="scale" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-16">
           {isAdmin && <StatCard title="Total_Users" value={stats.totalUsers} icon={<Users size={20}/>} theme={theme} />}
           <StatCard title="Orders_Volume" value={stats.totalOrders} icon={<ShoppingBag size={20}/>} theme={theme} />
           {isAdmin && <StatCard title="Gross_Revenue" value={`${stats.totalRevenue.toLocaleString()} £`} icon={<DollarSign size={20}/>} theme={theme} isGold />}
           <StatCard title="Active_Transmissions" value={stats.pendingOrders} icon={<Clock size={20}/>} theme={theme} />
-        </div>
+        </Reveal>
 
         {/* Table Container */}
         <div className={`relative rounded-[2rem] border-2 ${theme === 'dark' ? 'bg-black/40 border-white/5' : 'bg-white border-slate-200'} overflow-hidden shadow-2xl backdrop-blur-xl`}>
@@ -158,7 +160,7 @@ export default function AdminDashboard() {
               </thead>
               <tbody className="divide-y divide-white/5">
                 {filteredOrders.map((order) => (
-                  <tr key={order.id} className="hover:bg-[#FFA52F]/5 transition-all duration-300 group">
+                  <motion.tr key={order.id} layout initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }} className="hover:bg-[#FFA52F]/5 transition-colors duration-300 group">
                     <td className="p-8">
                       <div className="flex items-center gap-3">
                         <Hash size={14} className="text-[#FFA52F] opacity-40" />
@@ -230,7 +232,7 @@ export default function AdminDashboard() {
                         </div>
                       </td>
                     )}
-                  </tr>
+                  </motion.tr>
                 ))}
               </tbody>
             </table>

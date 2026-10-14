@@ -2,6 +2,7 @@ import './globals.css'
 import { Inter } from 'next/font/google'
 import { Metadata, Viewport } from 'next'
 import { ThemeProvider } from '../components/ThemeProvider'
+import { MotionProvider } from '../components/motion/MotionProvider'
 
 const inter = Inter({ subsets: ['latin'], display: 'swap' })
 
@@ -112,9 +113,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           defaultTheme="dark"
           enableSystem={false} 
         >
-          <div className="relative flex min-h-screen flex-col">
-            {children}
-          </div>
+          <MotionProvider>
+            <div className="relative flex min-h-screen flex-col">
+              {children}
+            </div>
+          </MotionProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -7,6 +7,9 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Footer from '@/components/Footer'
+import { Tilt3D } from '@/components/motion/Tilt3D'
+import { SplitText } from '@/components/motion/SplitText'
+import { EASE_OUT } from '@/components/motion/tokens'
 
 export default function ProductListContent() {
   const router = useRouter()
@@ -88,9 +91,11 @@ export default function ProductListContent() {
       <AnimatePresence>
         {showPopup && (
           <motion.div 
-            initial={{ opacity: 0, y: 50, x: '-50%' }} 
-            animate={{ opacity: 1, y: 0, x: '-50%' }} 
-            exit={{ opacity: 0, y: 50, x: '-50%' }} 
+            initial={{ opacity: 0, y: 60, x: '-50%', rotateX: 50, scale: 0.9 }} 
+            animate={{ opacity: 1, y: 0, x: '-50%', rotateX: 0, scale: 1 }} 
+            exit={{ opacity: 0, y: 40, x: '-50%', scale: 0.95 }} 
+            transition={{ type: 'spring', stiffness: 320, damping: 26 }}
+            style={{ transformPerspective: 800 }}
             className="fixed bottom-10 left-1/2 z-[300] bg-[#0A0A0A] text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-4 min-w-[320px] border border-white/10"
           >
             <div className="bg-green-500 p-1.5 rounded-full text-white"><CheckCircle2 size={18} /></div>
@@ -142,11 +147,20 @@ export default function ProductListContent() {
           <div className="flex items-center gap-5">
             <Link href="/cart" className="relative group p-2" aria-label="View Cart">
               <ShoppingCart size={24} className="text-gray-700 group-hover:text-[#EF6C00] transition-colors" />
-              {cartCount > 0 && (
-                <span className="absolute top-0 right-0 bg-[#EF6C00] text-white text-[9px] w-5 h-5 rounded-full flex items-center justify-center font-bold ring-2 ring-white">
-                  {cartCount}
-                </span>
-              )}
+              <AnimatePresence>
+                {cartCount > 0 && (
+                  <motion.span
+                    key={cartCount}
+                    initial={{ scale: 0, rotateY: -180 }}
+                    animate={{ scale: 1, rotateY: 0 }}
+                    exit={{ scale: 0 }}
+                    transition={{ type: 'spring', stiffness: 500, damping: 18 }}
+                    className="absolute top-0 right-0 bg-[#EF6C00] text-white text-[9px] w-5 h-5 rounded-full flex items-center justify-center font-bold ring-2 ring-white"
+                  >
+                    {cartCount}
+                  </motion.span>
+                )}
+              </AnimatePresence>
             </Link>
           </div>
         </div>
@@ -165,34 +179,58 @@ export default function ProductListContent() {
 
       <main className="container mx-auto px-4 py-12 flex-grow">
         <div className="flex flex-col items-center mb-16 text-center">
-            <span className="bg-[#22C55E] text-white px-5 py-1.5 text-[9px] font-black uppercase tracking-[0.4em] mb-4 rounded-full shadow-sm">
+            <motion.span
+              initial={{ opacity: 0, scale: 0.6, rotateX: -90 }}
+              animate={{ opacity: 1, scale: 1, rotateX: 0 }}
+              transition={{ type: 'spring', stiffness: 260, damping: 18, delay: 0.1 }}
+              style={{ transformPerspective: 500 }}
+              className="bg-[#22C55E] text-white px-5 py-1.5 text-[9px] font-black uppercase tracking-[0.4em] mb-4 rounded-full shadow-sm"
+            >
               Lab Tested Products
-            </span>
+            </motion.span>
             <h1 className="text-3xl md:text-5xl font-black uppercase text-gray-900 tracking-tighter max-w-4xl">
-              {filterPromo ? 'Exclusive Research Deals' : 'Alluvi Compound Collection'}
+              {/* key : le titre se rejoue quand on bascule le filtre promo */}
+              <SplitText key={String(filterPromo)} trigger="mount" delay={0.15} text={filterPromo ? 'Exclusive Research Deals' : 'Alluvi Compound Collection'} />
             </h1>
-            <p className="text-gray-500 mt-4 max-w-xl text-sm md:text-base italic">
+            <motion.p
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.9, ease: EASE_OUT, delay: 0.5 }}
+              className="text-gray-500 mt-4 max-w-xl text-sm md:text-base italic"
+            >
               Supplying the UK with pharmaceutical-grade research chemicals and precision delivery systems.
-            </p>
+            </motion.p>
         </div>
 
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {[1,2,3,4,5,6,7,8].map(i => (
-                <div key={i} className="animate-pulse bg-gray-50 rounded-2xl border border-gray-100 h-[400px]" />
+                <div key={i} className="relative overflow-hidden bg-gray-50 rounded-2xl border border-gray-100 h-[400px]">
+                  <motion.div
+                    className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/80 to-transparent"
+                    animate={{ x: ['-100%', '100%'] }}
+                    transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut', delay: i * 0.05 }}
+                  />
+                </div>
             ))}
           </div>
         ) : filteredProducts.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-10">
-            {filteredProducts.map((product: any) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-10" style={{ perspective: 1400 }}>
+            <AnimatePresence mode="popLayout">
+            {filteredProducts.map((product: any, index: number) => (
               <motion.article 
                 key={product.id} 
                 layout 
-                initial={{ opacity: 0, y: 20 }} 
-                animate={{ opacity: 1, y: 0 }} 
-                className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group flex flex-col overflow-hidden"
+                initial={{ opacity: 0, y: 60, rotateX: 25, scale: 0.95 }} 
+                whileInView={{ opacity: 1, y: 0, rotateX: 0, scale: 1 }} 
+                exit={{ opacity: 0, scale: 0.85, rotateY: -25 }}
+                viewport={{ once: true, margin: '0px 0px -8% 0px' }}
+                transition={{ duration: 0.9, ease: EASE_OUT, delay: (index % 4) * 0.08 }}
+                className="group"
               >
-                <Link href={`/products/${product.id}`} className="relative aspect-square overflow-hidden bg-[#FBFBFB] flex items-center justify-center p-8">
+              <Tilt3D max={9} className="h-full rounded-2xl" glareColor="rgba(239,108,0,0.10)">
+              <div className="h-full bg-white rounded-2xl border border-gray-100 shadow-sm group-hover:shadow-[0_40px_80px_-30px_rgba(0,0,0,0.3)] transition-shadow duration-500 flex flex-col">
+                <Link href={`/products/${product.id}`} className="relative aspect-square overflow-hidden rounded-t-2xl bg-[#FBFBFB] flex items-center justify-center p-8">
                   {product.on_sale && (
                     <div className="absolute top-4 left-4 bg-red-600 text-white text-[9px] font-black px-3 py-1.5 rounded-lg shadow-lg z-10 animate-pulse">
                       SALE
@@ -200,7 +238,7 @@ export default function ProductListContent() {
                   )}
                   <img 
                     src={product.main_image_url || "/placeholder.png"} 
-                    className="max-h-full w-auto object-contain transition-transform duration-700 group-hover:scale-110" 
+                    className="max-h-full w-auto object-contain transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-110 group-hover:-rotate-3" 
                     alt={`${product.name} - Alluvi Healthcare UK`}
                     loading="lazy"
                   />
@@ -222,32 +260,33 @@ export default function ProductListContent() {
                     <div className="flex items-center gap-3 mb-5">
                       <p className="text-[#EF6C00] font-black text-2xl">£{product.price}</p>
                     </div>
-                    <button 
+                    <motion.button 
+                      whileTap={{ scale: 0.94 }}
                       onClick={(e) => addToCart(e, product)} 
-                      className="w-full bg-[#0A0A0A] text-white py-4 rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-[#EF6C00] active:scale-95 transition-all flex items-center justify-center gap-3"
+                      className="w-full bg-[#0A0A0A] text-white py-4 rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-[#EF6C00] transition-colors duration-300 flex items-center justify-center gap-3"
                     >
                       <ShoppingCart size={14} /> Add to Cart
-                    </button>
+                    </motion.button>
                   </div>
                 </div>
+              </div>
+              </Tilt3D>
               </motion.article>
             ))}
+            </AnimatePresence>
           </div>
         ) : (
-          <div className="py-20 text-center">
-            <Search size={48} className="mx-auto text-gray-200 mb-4" />
+          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="py-20 text-center">
+            <motion.div animate={{ rotate: [0, -12, 12, 0] }} transition={{ duration: 2.4, repeat: Infinity, repeatDelay: 1 }} className="w-fit mx-auto">
+              <Search size={48} className="mx-auto text-gray-200 mb-4" />
+            </motion.div>
             <h3 className="text-xl font-bold text-gray-400 uppercase">No products found</h3>
-          </div>
+          </motion.div>
         )}
       </main>
 
       <Footer />
 
-      <style jsx global>{`
-        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-        .animate-marquee { animation: marquee 25s linear infinite; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-      `}</style>
     </div>
   )
 }
