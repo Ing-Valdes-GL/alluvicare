@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { requestLoginEmail, verifyLoginCode, authHeaders } from '@/lib/auth-client'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { User, CreditCard, Apple, Banknote, Bitcoin, X, Mail } from 'lucide-react'
@@ -16,7 +17,9 @@ export default function CheckoutPage() {
   // États pour le Modal d'Authentification
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [authLoading, setAuthLoading] = useState(false)
-  const [authMessage, setAuthMessage] = useState('')
+  const [authMessage, setAuthMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const [authCodeSent, setAuthCodeSent] = useState(false)
+  const [authCode, setAuthCode] = useState('')
 
   const [formData, setFormData] = useState({
     firstName: '', lastName: '', companyName: '',
@@ -111,21 +114,12 @@ export default function CheckoutPage() {
       const { error: itemsErr } = await supabase.from('order_items').insert(itemsToInsert)
       if (itemsErr) throw itemsErr
 
-      // 4. ENVOI DE L'EMAIL (API Route)
+      // 4. ENVOI DE L'EMAIL (API Route) — authentifié, la commande est relue en DB côté serveur
       fetch('/api/send-order', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: formData.email,
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          orderRef: order.reference_code || order.id.slice(0, 8).toUpperCase(),
-          date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
-          items: cartItems,
-          subtotal, discount, shipping, total,
-          paymentMethod: formData.paymentMethod,
-          address: formData
-        })
+        keepalive: true, // survit à la navigation vers /checkout2
+        headers: { 'Content-Type': 'application/json', ...(await authHeaders()) },
+        body: JSON.stringify({ orderId: order.id })
       }).catch(e => console.error("Email API Error:", e))
       
       // 5. NETTOYAGE ET REDIRECTION VERS CHECKOUT2
@@ -141,16 +135,29 @@ export default function CheckoutPage() {
 
   const handleRequestMagicLink = async () => {
     setAuthLoading(true)
-    setAuthMessage('')
+    setAuthMessage(null)
     try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email: formData.email,
-        options: { emailRedirectTo: `${window.location.origin}/checkout` }
-      })
-      if (error) throw error
-      setAuthMessage('A secure login link has been sent to your email. Click it to continue.')
-    } catch (err: any) {
-      setAuthMessage('Error: ' + err.message)
+      await requestLoginEmail(formData.email, '/checkout')
+      setAuthCodeSent(true)
+      setAuthMessage({ type: 'success', text: 'We emailed you a code. Enter it below, or click the link in the email.' })
+    } catch (err) {
+      setAuthMessage({ type: 'error', text: err instanceof Error ? err.message : 'Could not send the code.' })
+    } finally {
+      setAuthLoading(false)
+    }
+  }
+
+  const handleVerifyCode = async () => {
+    setAuthLoading(true)
+    setAuthMessage(null)
+    try {
+      await verifyLoginCode(formData.email, authCode)
+      setShowAuthModal(false)
+      setAuthCode('')
+      setAuthCodeSent(false)
+      await handlePlaceOrder() // session active : on reprend la commande directement
+    } catch (err) {
+      setAuthMessage({ type: 'error', text: err instanceof Error ? err.message : 'Invalid code.' })
     } finally {
       setAuthLoading(false)
     }
@@ -260,10 +267,36 @@ export default function CheckoutPage() {
             <p className="text-slate-500 text-sm mb-6">Verify your identity via email to complete your purchase.</p>
             <div className="space-y-4">
               <input type="email" readOnly value={formData.email} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl text-slate-500" />
-              {authMessage && <div className="p-4 rounded-xl bg-green-50 text-green-700 text-sm border border-green-200">{authMessage}</div>}
-              <button onClick={handleRequestMagicLink} disabled={authLoading} className="w-full bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-[#FFA52F] transition-all disabled:opacity-50">
-                {authLoading ? 'Sending...' : 'Request login link'}
-              </button>
+              {authMessage && (
+                <div className={`p-4 rounded-xl text-sm border ${authMessage.type === 'error' ? 'bg-red-50 text-red-700 border-red-200' : 'bg-green-50 text-green-700 border-green-200'}`}>
+                  {authMessage.text}
+                </div>
+              )}
+              {authCodeSent && (
+                <input
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  maxLength={10}
+                  placeholder="Enter code"
+                  value={authCode}
+                  onChange={(e) => setAuthCode(e.target.value.replace(/\D/g, ''))}
+                  className="w-full p-4 bg-white border border-slate-200 rounded-xl text-center text-2xl font-bold tracking-[0.4em] outline-none focus:border-[#FFA52F]"
+                />
+              )}
+              {authCodeSent ? (
+                <button onClick={handleVerifyCode} disabled={authLoading || authCode.length < 6} className="w-full bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-[#FFA52F] transition-all disabled:opacity-50">
+                  {authLoading ? 'Verifying...' : 'Verify & place order'}
+                </button>
+              ) : (
+                <button onClick={handleRequestMagicLink} disabled={authLoading} className="w-full bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-[#FFA52F] transition-all disabled:opacity-50">
+                  {authLoading ? 'Sending...' : 'Email me a sign-in code'}
+                </button>
+              )}
+              {authCodeSent && (
+                <button onClick={handleRequestMagicLink} disabled={authLoading} className="w-full text-sm text-slate-500 hover:text-slate-900">
+                  Resend code
+                </button>
+              )}
             </div>
           </div>
         </div>

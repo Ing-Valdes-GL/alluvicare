@@ -1,94 +1,89 @@
-import { NextResponse } from 'next/server';
-import { Resend } from 'resend';
+import { NextResponse } from 'next/server'
+import { getSupabaseAdmin, getRequestUser } from '@/lib/server/supabase-admin'
+import { sendEmail, FROM_ORDERS } from '@/lib/server/mailer'
+import { orderReceivedEmail, type OrderEmailData } from '@/lib/email/templates'
+import { rateLimit } from '@/lib/server/rate-limit'
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+export const runtime = 'nodejs'
 
+const ADMIN_NOTIFY_EMAIL = process.env.ADMIN_NOTIFY_EMAIL || 'alluvihealthcare42@gmail.com'
+
+/**
+ * Email "commande reçue".
+ * Sécurité : l'appelant doit être authentifié ET propriétaire de la commande.
+ * Les données viennent de la DB, pas du body (l'ancienne route était un relais ouvert :
+ * n'importe qui pouvait envoyer du HTML arbitraire depuis notre domaine → réputation détruite).
+ */
 export async function POST(req: Request) {
   try {
-    const orderData = await req.json();
+    const user = await getRequestUser(req)
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    if (!rateLimit(`send-order:${user.id}`, 10, 60 * 60 * 1000).ok) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+    }
 
-    const { 
-      email, firstName, lastName, orderRef, date, items, 
-      subtotal, discount, shipping, total, paymentMethod, address 
-    } = orderData;
+    const { orderId } = (await req.json().catch(() => ({}))) as { orderId?: unknown }
+    if (typeof orderId !== 'string' || !orderId) {
+      return NextResponse.json({ error: 'orderId is required' }, { status: 400 })
+    }
 
-    // 1. Génération de la liste des produits en HTML
-    const itemsHtml = items.map((item: any) => `
-      <tr>
-        <td style="padding: 8px; border-bottom: 1px solid #eee;">${item.name} <br><strong>× ${item.quantity}</strong></td>
-        <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">£${(item.price * item.quantity).toFixed(2)}</td>
-      </tr>
-    `).join('');
+    const db = getSupabaseAdmin()
+    const { data: order, error } = await db.from('orders').select('*').eq('id', orderId).maybeSingle()
+    if (error) throw error
+    if (!order || order.user_id !== user.id) return NextResponse.json({ error: 'Order not found' }, { status: 404 })
 
-    // 2. Préparation du contenu HTML (Ton design original)
-    const htmlContent = `
-      <div style="font-family: sans-serif; max-width: 600px; margin: auto; color: #333;">
-        <h1 style="color: #FFA52F;">Thank you for your order</h1>
-        <p>Hi ${firstName},</p>
-        <p>We’ve received your order and it’s currently on hold until we can confirm your payment has been processed.</p>
-        <p>Here’s a reminder of what you’ve ordered:</p>
-        
-        <h2 style="font-size: 18px; margin-top: 30px;">Order #${orderRef} (${date})</h2>
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
-          <thead>
-            <tr>
-              <th style="text-align: left; padding: 8px; border-bottom: 2px solid #ddd;">Product</th>
-              <th style="text-align: right; padding: 8px; border-bottom: 2px solid #ddd;">Price</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${itemsHtml}
-          </tbody>
-          <tfoot style="font-weight: bold;">
-            <tr><td style="padding: 8px;">Subtotal:</td><td style="text-align: right;">£${subtotal.toFixed(2)}</td></tr>
-            <tr><td style="padding: 8px; color: #FFA52F;">Discount:</td><td style="text-align: right; color: #FFA52F;">-£${discount.toFixed(2)}</td></tr>
-            <tr><td style="padding: 8px;">Shipping: Express Delivery</td><td style="text-align: right;">£${shipping.toFixed(2)}</td></tr>
-            <tr><td style="padding: 8px; font-size: 18px;">Total:</td><td style="text-align: right; font-size: 18px;">£${total.toFixed(2)}</td></tr>
-            <tr><td style="padding: 8px;">Payment method:</td><td style="text-align: right;">${paymentMethod}</td></tr>
-          </tfoot>
-        </table>
+    const { data: items, error: itemsError } = await db
+      .from('order_items')
+      .select('product_name, quantity, unit_price')
+      .eq('order_id', order.id)
+    if (itemsError) throw itemsError
 
-        <div style="display: flex; justify-content: space-between; gap: 20px; margin-top: 30px;">
-          <div style="flex: 1;">
-            <h3 style="font-size: 16px;">Billing address</h3>
-            <p style="margin: 0; line-height: 1.5; color: #555;">
-              ${firstName} ${lastName}<br>
-              ${address.companyName ? address.companyName + '<br>' : ''}
-              ${address.streetAddress}<br>
-              ${address.townCity}, ${address.county}<br>
-              ${address.postcode}<br>
-              ${address.country}<br>
-              ${address.phone}<br>
-              ${email}
-            </p>
-          </div>
-        </div>
+    const data: OrderEmailData = {
+      reference: order.reference_code || String(order.id).slice(0, 8).toUpperCase(),
+      createdAt: new Date(order.created_at ?? Date.now()).toLocaleDateString('en-GB', {
+        year: 'numeric', month: 'long', day: 'numeric',
+      }),
+      firstName: order.first_name ?? '',
+      lastName: order.last_name ?? '',
+      email: order.email_address,
+      companyName: order.company_name,
+      streetAddress: order.street_address,
+      apartment: order.apartment_suite,
+      townCity: order.town_city,
+      county: order.county,
+      postcode: order.postcode,
+      country: order.country,
+      phone: order.phone,
+      paymentMethod: order.payment_method,
+      subtotal: Number(order.subtotal) || 0,
+      discount: Number(order.discount_amount) || 0,
+      shipping: Number(order.shipping_fee) || 0,
+      total: Number(order.total_amount) || 0,
+      items: (items ?? []).map((i) => ({
+        product_name: i.product_name,
+        quantity: Number(i.quantity) || 0,
+        unit_price: Number(i.unit_price) || 0,
+      })),
+    }
 
-        <p style="margin-top: 40px; font-size: 14px; color: #777;">
-          Thanks again! If you need any help with your order, please contact us at <a href="https://alluvihealthcareuk.store/chat" style="color: #FFA52F;">support@alluvihealthcareuk.store</a>.<br>
-          <strong>Alluvi Health care</strong><br>
-          United Kingdom (UK).
-        </p>
-      </div>
-    `;
+    const content = orderReceivedEmail(data)
+    // Envois séparés : le client ne voit pas l'adresse admin, et un signalement spam ne touche que son envoi.
+    const results = await Promise.allSettled([
+      sendEmail({ from: FROM_ORDERS, to: data.email, content, tag: 'order-received' }),
+      sendEmail({
+        from: FROM_ORDERS,
+        to: ADMIN_NOTIFY_EMAIL,
+        content: { ...content, subject: `[New order] #${data.reference} — ${data.email}` },
+        tag: 'order-admin',
+      }),
+    ])
 
-    // 3. Liste des destinataires (Client + les 3 Admins)
-    const recipients = [
-      email, // L'utilisateur
-      'alluvihealthcare42@gmail.com'
-    ];
+    if (results[0].status === 'rejected') throw results[0].reason
+    if (results[1].status === 'rejected') console.error('[send-order] admin copy failed:', results[1].reason)
 
-    // 4. Envoi unique à tout le monde
-    const data = await resend.emails.send({
-      from: 'Alluvicare Orders <support@alluvihealthcareuk.store>',
-      to: recipients,
-      subject: `Order Confirmation #${orderRef} - Alluvicare`,
-      html: htmlContent,
-    });
-
-    return NextResponse.json(data);
-  } catch (error) {
-    console.error("Resend Error:", error);
-    return NextResponse.json({ error }, { status: 500 });
+    return NextResponse.json({ success: true })
+  } catch (err) {
+    console.error('[send-order]', err instanceof Error ? err.message : err)
+    return NextResponse.json({ error: 'Could not send order email' }, { status: 500 })
   }
 }

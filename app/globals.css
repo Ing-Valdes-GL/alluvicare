@@ -50,3 +50,8 @@
   background-color: #F59E0B;
   border-radius: 20px;
 }
+/* Auth scene : défilement du sol en grille 3D */
+@keyframes auth-grid {
+  from { background-position: 0 0; }
+  to { background-position: 0 64px; }
+}

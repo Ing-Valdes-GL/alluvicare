@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { authHeaders } from '@/lib/auth-client'
 import { useTheme } from '@/components/ThemeProvider'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
@@ -64,7 +65,7 @@ export default function AdminDashboard() {
       if (!input) return
       reason = input
     } else {
-      if (!confirm(`Authorize transmission #${order.order_reference}?`)) return
+      if (!confirm(`Authorize transmission #${order.reference_code}?`)) return
     }
 
     setActionLoading(order.id)
@@ -76,9 +77,11 @@ export default function AdminDashboard() {
 
       fetch('/api/send-order-email', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ order, type: action === 'approve' ? 'CONFIRMATION' : 'DELETION', reason })
-      }).catch(e => console.error("Email API Error:", e))
+        headers: { 'Content-Type': 'application/json', ...(await authHeaders()) },
+        body: JSON.stringify({ orderId: order.id, type: action === 'approve' ? 'CONFIRMATION' : 'DELETION', reason })
+      })
+        .then(async (res) => { if (!res.ok) alert(`EMAIL_NOT_SENT: ${(await res.json().catch(() => ({}))).error ?? res.status}`) })
+        .catch(e => console.error("Email API Error:", e))
 
       fetchData()
     } catch (err: any) {
@@ -87,7 +90,7 @@ export default function AdminDashboard() {
   }
 
   const filteredOrders = recentOrders.filter(order => 
-    order.order_reference?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    order.reference_code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     order.email_address?.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
